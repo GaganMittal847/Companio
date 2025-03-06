@@ -77,12 +77,31 @@ export class ExternalController {
 
     private generateOtp = async (req: Request, res: Response) => {
         console.log('coming');
-        const mobile_number = req.body.mobile_number;
+        const mobile_number = req.body.mobile;
+
+        const role = req.body.role;
+
+        const user = await SignupModel.findOne({
+            mobileNo: mobile_number,
+            type: role
+        });
+
+        if(!user){
+
+            res.status(400).json({ status : false ,error: "User Not found" });
+            return;
+
+
+        }
+
+
       //  const type = req.body.type;
         if (!mobile_number || !/^\d{10}$/.test(mobile_number)) {
             res.status(400).json({ error: "Mobile number must be exactly 10 digits" });
             return;
         }
+
+
 
         try {
             const timestamp = new Date();
@@ -106,13 +125,14 @@ export class ExternalController {
                 await c_otp.save();
             }
 
-            res.json({ message: "Otp sent successfully", status: "success",data: otp });
+            res.json({ message: "Otp sent successfully", status: true,data: otp });
             
         } catch (e) {
             console.error("Error in sending otp", e);
             res.status(500).json({ error: "Failed to send otp", status: "failed" });
         }
     };
+    
 
     private userSignUp = async (req: Request, res: Response): Promise<any>  => {
         try {
@@ -123,7 +143,7 @@ export class ExternalController {
             }
     
             // Check if user already exists
-            const existingUser = await SignupModel.findOne({ mobileNo });
+            const existingUser = await SignupModel.findOne({ mobileNo : mobileNo , type : type });
             if (existingUser) {
                 return res.status(400).json({ message: 'User already exists' });
             }
