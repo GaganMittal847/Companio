@@ -1,4 +1,4 @@
-import { HttpServer } from '../server/HttpServer';
+import { HttpServer } from '../../server/HttpServer';
 import dotenv from 'dotenv';
 dotenv.config();
 

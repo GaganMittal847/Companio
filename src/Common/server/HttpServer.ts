@@ -2,8 +2,8 @@ import express, { Express, Request, Response } from "express";
 import http from "http";
 import cors from 'cors';
 import connectToDatabase from "../config/db";
-import { ExternalController } from "../controllers/ExternalController";
-import { categoryRoutes } from "../routes/categoryRoutes";
+import { ExternalController } from "../../Buyer/controllers/ExternalController";
+import { categoryRoutes } from "../../Buyer/routes/categoryRoutes";
 export class HttpServer {
   private app: Express;
   private port: number;
