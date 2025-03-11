@@ -43,6 +43,7 @@ export class ExternalController {
                 const currentTimestamp = Date.now();
                 const diffMillis = currentTimestamp - actualTimestamp;
                 const diffMinutes = diffMillis / 60000;
+                console.log(diffMinutes);
 
                 if (diffMinutes >= 1) {
                     apiResponseDto.status = ApiResponse.ERROR;
@@ -57,8 +58,11 @@ export class ExternalController {
                     comp_otp.otp = null;
                     await comp_otp.save();
 
+                    const user = await SignupModel.findOne({mobileNo :mobileNumber });
+
                     apiResponseDto.status = ApiResponse.SUCCESS;
                     apiResponseDto.message = ApiResponse.OTP_VERIFIED;
+                    apiResponseDto.data = user;
                     apiResponseDto.responseCode = HttpStatus.OK;
                 }
             } else {
@@ -107,7 +111,7 @@ export class ExternalController {
             const timestamp = new Date();
             const currTimeStamp = timestamp.getTime();
             const otp = Math.floor(Math.random() * 9000) + 1000;
-            const c_otp = await LoginEntity.findOne({ mobile_number});
+            const c_otp = await LoginEntity.findOne({ mobileNo : mobile_number});
             if (c_otp == null) {
                 const lead = new LoginEntity({
                     mobileNo: mobile_number,
