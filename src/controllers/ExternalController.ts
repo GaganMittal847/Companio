@@ -4,6 +4,7 @@ import { Counter, SignupModel } from '../models/UserModel';
 import { LoginEntity } from '../entities/LoginEntity';
 import { ApiResponseDto } from '../models/Dto/ApiResponseDto';
 import { ApiResponse, HttpStatus } from '../config/constant/constant';
+import { RegisterUserEntity } from '../entities/RegisterUserEntity';
 //import { SignupModel } from '../config/constant/controllers/models/Entities/UserEntity';
 
 
@@ -22,7 +23,8 @@ export class ExternalController {
     private configureRoutes(): void {
        this.router.post('/otp', this.generateOtp);
        this.router.post('/otp/verify', this.verifyOtp);
-        this.router.post('/signUp',this.userSignUp);
+       this.router.post('/signUp',this.userSignUp);
+       this.router.post('/regiter',this.registerCategory);
 
     }
 
@@ -166,6 +168,16 @@ export class ExternalController {
             { new: true, upsert: true }
         );
         return counter?.count ?? 1;
+    }
+
+    private registerCategory = async (req: Request, res: Response): Promise<any>  => {
+        try{
+            const { mobileNo , catId, subCatIds , coordinates } = req.body;
+
+            const id = 
+
+
+        }
     }
 
 }
