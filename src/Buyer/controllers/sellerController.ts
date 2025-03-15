@@ -5,6 +5,7 @@ import { ApiResponseDto } from '../../models/Dto/ApiResponseDto';
 import { HttpStatus } from '../../config/constant/constant';
 
 // Get sellers within a 20 km range from the given location
+// Get top rated nearest 50 sellers
 export const getListOfSellers = async (req: Request, res: Response) => {
     try {
       // Extract the latitude and longitude from the request body (or query)
