@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { UserEntity } from '../entities/UserEntity';
+import { UserEntity, SellerStatus } from '../entities/UserEntity';
+
 
 //import {autoIncrement} from 'mongoose-auto-increment';
 
@@ -9,7 +10,8 @@ const CounterSchema: Schema = new Schema({
 });
 
 
-const SignupSchema: Schema = new Schema({
+const SignupSchema: Schema = new Schema(
+{
     name: { type: String, required: true },
     mobileNo: { type: String, required: true },
     profilePic: { type: String, required: false },
@@ -19,9 +21,22 @@ const SignupSchema: Schema = new Schema({
     media: { type: [String], required: false }, 
     catList: { type: [String], required: false }, 
     subCatList: { type: [String], required: false }, 
-    id: { type: String, required: true, unique: true }
-});
+    id: { type: String, required: true, unique: true },
+    rating: { type: String, required: false },
+    status: { type: String, enum: Object.values(SellerStatus), required: false },
+    location: { 
+      type: { type: String, enum: ['Point'], required: false }, // Type is always "Point" for GeoJSON
+      coordinates: { type: [Number], required: false } // Array of numbers [longitude, latitude]
+    },
+    bio: { type: String, required: false, length: 20 },
+},
+{ timestamps: true } // Automatically manage createdAt and updatedAt
+);
 
 export const Counter = mongoose.model('Counter', CounterSchema);
+
+
+SignupSchema.index({ location: '2dsphere' });
+
 
 export const UserModel = mongoose.model<UserEntity>('users', SignupSchema);
