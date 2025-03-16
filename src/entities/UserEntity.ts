@@ -1,3 +1,12 @@
+// Enum for Seller Status
+import { Document } from 'mongoose';
+
+export enum SellerStatus {
+    ACTIVE = 'Active',
+    INACTIVE = 'Inactive',
+    PENDING = 'Pending',
+  }
+
 // Define the Gender Enum
 export enum Gender {
     MALE = 'male',
@@ -17,12 +26,14 @@ export interface UserEntity extends Document {
     subCatList?: string[];
     bio?: string;
     geoLocation?: {
-        latitude: number;
-        longitude: number;
+        type:string;
+        coordinates: number[];
     };
     age: number;
     gender: Gender;  // Use the Gender enum
     cDt: Date;
     uDt: Date;
     id: string;
+    rating?: string;
+    status?: SellerStatus;
 }

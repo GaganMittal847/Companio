@@ -200,9 +200,12 @@ export class ExternalController {
             user.bio = bio;
             user.age = age;
             user.gender = gender;
-            user.geoLocation = location;
+           // if (!user.geoLocation) {
+                user.geoLocation = { type: "Point", coordinates: [] }; // Ensure geoLocation exists
+           // }
             
-            // if (location.latitude && location.longitude) {
+            user.geoLocation.coordinates = [location.longitude, location.latitude];
+            // if (location.latitude && location.latitude) {
             //     user.geoLocation? = {
             //         latitude: location.latitude,
             //         longitude: location.longitude,
