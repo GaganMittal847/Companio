@@ -5,7 +5,7 @@ import connectToDatabase from "../config/db";
 import { ExternalController } from "../controllers/ExternalController";
 import { categoryRoutes } from "../routes/categoryRoutes";
 import { subCategoryRoutes } from "../routes/subCategoryRoutes";
-import { sellerRoutes } from "../Buyer/routes/sellerRoutes";
+//import { sellerRoutes } from "../routes/sellerRoutes";
 
 export class HttpServer {
   private app: Express;
@@ -52,7 +52,7 @@ export class HttpServer {
     this.app.use("/companio/external", externalController.router);
     this.app.use("/api/categories", categoryRoutes);
     this.app.use("/api/subCategories", subCategoryRoutes);
-    this.app.use("/getListOfSellers", sellerRoutes);
+   // this.app.use("/getListOfSellers", sellerRoutes);
     this.app.get("/cms/health", (req: Request, res: Response) => {
       res.status(200).json({
         status: "UP",

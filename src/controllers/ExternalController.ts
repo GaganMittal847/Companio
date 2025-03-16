@@ -24,6 +24,8 @@ export class ExternalController {
        this.router.post('/otp', this.generateOtp);
        this.router.post('/otp/verify', this.verifyOtp);
        this.router.post('/signUp',this.userSignUp);
+       this.router.post('/profileSetup',this.profileSetup);
+     //  this.router.post('/catRegistration', this.categoryRegistration);
 
     }
 
@@ -141,9 +143,9 @@ export class ExternalController {
 
     private userSignUp = async (req: Request, res: Response): Promise<any>  => {
         try {
-            const { name, mobileNo, profilePic, type, fcmToken, deviceType} = req.body;
+            const { name, mobileNo , type , fcmToken, deviceType , profilePic} = req.body;
 
-            if(!name || !mobileNo || !type){
+            if(!name || !mobileNo || !type ){
                 return res.status(400).json({ message: 'missing field'});
             }
     
@@ -153,17 +155,10 @@ export class ExternalController {
                 return res.status(400).json({ message: 'User already exists' });
             }
 
-            const id = await this.generateUserId();
+            const id = "USER" + await this.generateUserId();
             // Create new user
             const newUser = new UserModel({ name, mobileNo, profilePic, type, fcmToken, deviceType, id });
             await newUser.save();
-
-            const data = {
-                "name" : name,
-                "mobileNo" : mobileNo,
-                "type": type
-            }
-            const token = generateAndReturnToken(data);
 
             // const data: {
             //     "token": generateAndReturnToken(newUser);
@@ -184,6 +179,55 @@ export class ExternalController {
         return counter?.count ?? 1;
     }
 
+    private profileSetup = async (req: Request, res: Response): Promise<any> => {
+        try {
+            const { age , gender , userId, profilePic, location, bio } = req.body;
+    
+            // Validate required fields
+            if (!userId || !age || !gender || !profilePic || !location || !bio) {
+                return res.status(400).json({ message: "All fields (userId, profilePic, location, bio) are required." });
+            }
+    
+            // Find the user
+            const user = await UserModel.findOne({ id: userId });
+    
+            if (!user) {
+                return res.status(404).json({ message: "User not found." });
+            }
+    
+            // Update user fields
+            user.profilePic = profilePic;
+            user.bio = bio;
+            user.age = age;
+            user.gender = gender;
+            user.geoLocation = location;
+            
+            // if (location.latitude && location.longitude) {
+            //     user.geoLocation? = {
+            //         latitude: location.latitude,
+            //         longitude: location.longitude,
+            //     };
+            // } else {
+            //     return res.status(400).json({ message: "Invalid location format. Latitude and Longitude are required." });
+            // }
+    
+            // Save updated user
+            await user.save();
+    
+            return res.status(200).json({ message: "Profile updated successfully.", user });
+    
+        } catch (error) {
+            console.error("Error in profile setup:", error);
+            return res.status(500).json({ message: "Internal server error.", error });
+        }
+    };
+
+    // private categoryRegistration = async (req: Request, res: Response): Promise<any> => {
+
+    //     const {userId , catId , subCatId } = req.body;
+
+
+    // }
 }
 
 
