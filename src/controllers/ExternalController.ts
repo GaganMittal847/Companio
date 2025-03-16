@@ -22,7 +22,7 @@ export class ExternalController {
     private configureRoutes(): void {
        this.router.post('/otp', this.generateOtp);
        this.router.post('/otp/verify', this.verifyOtp);
-        this.router.post('/signUp',this.userSignUp);
+       this.router.post('/signUp',this.userSignUp);
 
     }
 

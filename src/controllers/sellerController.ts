@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { SellerModel } from '../../models/SellerModel';
-import { Seller } from '../../entities/SellerEntity';
-import { ApiResponseDto } from '../../models/Dto/ApiResponseDto'; 
-import { HttpStatus } from '../../config/constant/constant';
+import { SellerModel } from '../models/SellerModel';
+import { Seller } from '../entities/SellerEntity';
+import { ApiResponseDto } from '../models/Dto/ApiResponseDto'; 
+import { HttpStatus } from '../config/constant/constant';
 
 // Get sellers within a 20 km range from the given location
 // Get top rated nearest 50 sellers
