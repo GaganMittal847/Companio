@@ -30,10 +30,12 @@ export const generateToken = (payload: Record<string, any>): string => {
 };
 
 
-export const generateAndReturnToken = (currentUser: any): string => {
+export const generateAndReturnToken = (user: any): string => {
     const dto: GenerateTokenDto = {
-        id: currentUser?.id,
-        mobileNo: currentUser?.mobile
+        name: user?.name,
+        mobileNo: user?.mobileNo,
+        type: user?.type
+
     };
     return generateToken(dto);
 };

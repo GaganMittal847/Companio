@@ -1,6 +1,6 @@
 //import { HttpStatus } from "../../../constant";
 
-import { HttpStatus } from "../../config/constant/constant";
+import { HttpStatus } from "../../../constant/constant";
 
 //import { HttpStatus } from "../../constants/constants";
 export class ApiResponseDto<T> {

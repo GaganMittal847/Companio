@@ -1,6 +1,6 @@
 export class GenerateTokenDto {
-    id?: string;
+    type?: string;
     mobileNo?: string;
     name?: string;
-    email?: string;
+    //email?: string;
 }

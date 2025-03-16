@@ -4,6 +4,7 @@ import { Counter, UserModel } from '../models/UserModel';
 import { LoginEntity } from '../entities/LoginEntity';
 import { ApiResponseDto } from '../models/Dto/ApiResponseDto';
 import { ApiResponse, HttpStatus } from '../config/constant/constant';
+import { generateAndReturnToken }  from '../middleware/jwtHelper';
 //import { SignupModel } from '../config/constant/controllers/models/Entities/UserEntity';
 
 
@@ -156,6 +157,17 @@ export class ExternalController {
             // Create new user
             const newUser = new UserModel({ name, mobileNo, profilePic, type, fcmToken, deviceType, id });
             await newUser.save();
+
+            const data = {
+                "name" : name,
+                "mobileNo" : mobileNo,
+                "type": type
+            }
+            const token = generateAndReturnToken(data);
+
+            // const data: {
+            //     "token": generateAndReturnToken(newUser);
+            // }
     
             res.status(200).json({ message: 'User signed up successfully', user: newUser });
         } catch (error) {
