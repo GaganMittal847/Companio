@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/', getSubcategories);
 
 // Route to create a new category
-router.post('/', createSubcategory);  // Assuming `checkAuth` ensures the user is authenticated
+router.post('/create', createSubcategory);  // Assuming `checkAuth` ensures the user is authenticated
 
 // Route to update an existing category
 

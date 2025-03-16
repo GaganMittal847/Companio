@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { UserModel } from "../models/UserModel";
-import { UserEntity } from "../entities/UserEntity";
 import { ApiResponseDto } from "../models/Dto/ApiResponseDto";
 import { HttpStatus } from "../constant/constant";
 
@@ -12,6 +11,9 @@ export const getListOfSellers = async (req: Request, res: Response) => {
     if (!latitude || !longitude) {
       return res.status(HttpStatus.BAD_REQUEST).json(new ApiResponseDto("fail", "Latitude and longitude are required", null, HttpStatus.BAD_REQUEST));
     }
+
+    const test = await UserModel.find();
+    console.log(test);
 
     const sellers = await UserModel.find({
       type: "seller",
