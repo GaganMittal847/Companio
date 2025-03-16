@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import { Counter, UserModel } from '../models/UserModel';
 import { LoginEntity } from '../entities/LoginEntity';
 import { ApiResponseDto } from '../models/Dto/ApiResponseDto';
-import { ApiResponse, HttpStatus } from '../config/constant/constant';
+import { ApiResponse, HttpStatus } from '../constant/constant';
 import { generateAndReturnToken }  from '../middleware/jwtHelper';
 //import { SignupModel } from '../config/constant/controllers/models/Entities/UserEntity';
 
