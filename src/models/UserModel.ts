@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { SignupEntity } from '../entities/UserEntity';
+import { UserEntity } from '../entities/UserEntity';
 
 //import {autoIncrement} from 'mongoose-auto-increment';
 
@@ -16,10 +16,12 @@ const SignupSchema: Schema = new Schema({
     type: { type: String, enum: ['buyer', 'seller'], required: true },
     fcmToken: { type: String, required: false },
     deviceType: { type: String, required: false },
-    cDt: { type: Date, default: Date.now },
+    media: { type: [String], required: false }, 
+    catList: { type: [String], required: false }, 
+    subCatList: { type: [String], required: false }, 
     id: { type: String, required: true, unique: true }
 });
 
 export const Counter = mongoose.model('Counter', CounterSchema);
 
-export const SignupModel = mongoose.model<SignupEntity>('Signup', SignupSchema);
+export const UserModel = mongoose.model<UserEntity>('users', SignupSchema);

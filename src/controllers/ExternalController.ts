@@ -1,6 +1,6 @@
 import { Router, Request, Response, response, application } from 'express';
 import dotenv from 'dotenv';
-import { Counter, SignupModel } from '../models/UserModel';
+import { Counter, UserModel } from '../models/UserModel';
 import { LoginEntity } from '../entities/LoginEntity';
 import { ApiResponseDto } from '../models/Dto/ApiResponseDto';
 import { ApiResponse, HttpStatus } from '../config/constant/constant';
@@ -58,7 +58,7 @@ export class ExternalController {
                     comp_otp.otp = null;
                     await comp_otp.save();
 
-                    const user = await SignupModel.findOne({mobileNo :mobileNumber });
+                    const user = await UserModel.findOne({mobileNo :mobileNumber });
 
                     apiResponseDto.status = ApiResponse.SUCCESS;
                     apiResponseDto.message = ApiResponse.OTP_VERIFIED;
@@ -85,7 +85,7 @@ export class ExternalController {
 
         const role = req.body.role;
 
-        const user = await SignupModel.findOne({
+        const user = await UserModel.findOne({
             mobileNo: mobile_number,
             type: role
         });
@@ -147,14 +147,14 @@ export class ExternalController {
             }
     
             // Check if user already exists
-            const existingUser = await SignupModel.findOne({ mobileNo : mobileNo , type : type });
+            const existingUser = await UserModel.findOne({ mobileNo : mobileNo , type : type });
             if (existingUser) {
                 return res.status(400).json({ message: 'User already exists' });
             }
 
             const id = await this.generateUserId();
             // Create new user
-            const newUser = new SignupModel({ name, mobileNo, profilePic, type, fcmToken, deviceType, id });
+            const newUser = new UserModel({ name, mobileNo, profilePic, type, fcmToken, deviceType, id });
             await newUser.save();
     
             res.status(200).json({ message: 'User signed up successfully', user: newUser });
