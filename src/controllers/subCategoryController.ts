@@ -1,22 +1,43 @@
-import { Request, Response } from 'express';
-import { SubcategoryModel } from '../models/SubCategoryModel'; // Import the subcategory model
-import { SubCategoryEntity } from '../entities/SubCategoryEntity'; // Import the subcategory entity
+import { Request, Response } from "express";
+import { SubcategoryModel } from "../models/SubCategoryModel"; // Import the subcategory model
+import { SubCategoryEntity } from "../entities/SubCategoryEntity"; // Import the subcategory entity
+import { ApiResponseDto } from "../models/Dto/ApiResponseDto";
+import { CategoryModel } from "../models/CategoryModel"; // Import the category model
+import { HttpStatus } from "../constant/constant"; // Import HttpStatus
 
 // Get all subcategories
 export const getSubcategories = async (req: Request, res: Response) => {
   try {
     const subcategories = await SubcategoryModel.find();
-    return res.status(200).json(subcategories);
+    return res
+      .status(HttpStatus.OK)
+      .json(new ApiResponseDto("success", "Subcategories retrieved successfully", subcategories, HttpStatus.OK));
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to retrieve subcategories' });
+    return res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json(new ApiResponseDto("fail", "Failed to retrieve subcategories", null, HttpStatus.INTERNAL_SERVER_ERROR));
   }
 };
 
 // Create a new subcategory
 export const createSubcategory = async (req: Request, res: Response) => {
-  const { name, scid, cdt, scpic, categoryId }: SubCategoryEntity = req.body; // Assuming SubCategoryEntity defines the shape of a subcategory
+  const { name, scid, cdt, scpic, categoryId }: SubCategoryEntity = req.body;
 
   try {
+    // Check if category exists
+
+    const categoryExists = await CategoryModel.findOne({ cid: categoryId });
+    const allCategories = await CategoryModel.find();
+
+    console.log(allCategories)
+
+    if (!categoryExists) {
+      console.log("cateogry does not exist")
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .json(new ApiResponseDto("fail", "Category ID not found", null, HttpStatus.NOT_FOUND));
+    }
+
     const newSubcategory = new SubcategoryModel({
       name,
       scid,
@@ -26,27 +47,37 @@ export const createSubcategory = async (req: Request, res: Response) => {
     });
 
     await newSubcategory.save();
-    return res.status(201).json(newSubcategory);
+    return res
+      .status(HttpStatus.CREATED)
+      .json(new ApiResponseDto("success", "Subcategory created successfully", newSubcategory, HttpStatus.CREATED));
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to create subcategory' });
+    return res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json(new ApiResponseDto("fail", "Failed to create subcategory", null, HttpStatus.INTERNAL_SERVER_ERROR));
   }
 };
 
 // Update an existing subcategory by ID
 export const updateSubcategory = async (req: Request, res: Response) => {
   const { scid } = req.params;
-  const updateData = req.body; // Data to update (e.g., name, cdt, scpic, categoryId)
+  const updateData = req.body;
 
   try {
     const updatedSubcategory = await SubcategoryModel.findByIdAndUpdate(scid, updateData, { new: true });
-    
+
     if (!updatedSubcategory) {
-      return res.status(404).json({ message: 'Subcategory not found' });
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .json(new ApiResponseDto("fail", "Subcategory not found", null, HttpStatus.NOT_FOUND));
     }
 
-    return res.status(200).json(updatedSubcategory);
+    return res
+      .status(HttpStatus.OK)
+      .json(new ApiResponseDto("success", "Subcategory updated successfully", updatedSubcategory, HttpStatus.OK));
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to update subcategory' });
+    return res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json(new ApiResponseDto("fail", "Failed to update subcategory", null, HttpStatus.INTERNAL_SERVER_ERROR));
   }
 };
 
@@ -58,11 +89,17 @@ export const deleteSubcategory = async (req: Request, res: Response) => {
     const deletedSubcategory = await SubcategoryModel.findByIdAndDelete(scid);
 
     if (!deletedSubcategory) {
-      return res.status(404).json({ message: 'Subcategory not found' });
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .json(new ApiResponseDto("fail", "Subcategory not found", null, HttpStatus.NOT_FOUND));
     }
 
-    return res.status(200).json({ message: 'Subcategory deleted successfully' });
+    return res
+      .status(HttpStatus.OK)
+      .json(new ApiResponseDto("success", "Subcategory deleted successfully", null, HttpStatus.OK));
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to delete subcategory' });
+    return res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json(new ApiResponseDto("fail", "Failed to delete subcategory", null, HttpStatus.INTERNAL_SERVER_ERROR));
   }
 };

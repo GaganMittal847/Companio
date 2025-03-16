@@ -143,13 +143,17 @@ export class ExternalController {
         try {
             const { name, mobileNo, profilePic, type, fcmToken, deviceType} = req.body;
 
+
             if(!name || !mobileNo || !type){
                 return res.status(400).json({ message: 'missing field'});
             }
     
             // Check if user already exists
             const existingUser = await UserModel.findOne({ mobileNo : mobileNo , type : type });
+            console.log("existingUser" + existingUser);
             if (existingUser) {
+                console.log("existingUser" + existingUser);
+
                 return res.status(400).json({ message: 'User already exists' });
             }
 
@@ -171,6 +175,7 @@ export class ExternalController {
     
             res.status(200).json({ message: 'User signed up successfully', user: newUser });
         } catch (error) {
+            console.log(error)
             res.status(500).json({ message: 'Internal Server Error', error });
         }
     };
