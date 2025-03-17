@@ -3,7 +3,11 @@ import http from "http";
 import cors from 'cors';
 import connectToDatabase from "../config/db";
 import { ExternalController } from "../controllers/ExternalController";
-import { categoryRoutes } from "../routes/categoryRoutes";
+import { CategoryController } from "../controllers/categoryController";
+import { SubCategoryController } from "../controllers/subCategoryController";
+import { SellerController } from "../controllers/sellerController";
+
+import { categoryRoutes } from "../";
 import { subCategoryRoutes } from "../routes/subCategoryRoutes";
 import { sellerRoutes } from "../routes/sellerRoutes";
 
@@ -50,9 +54,9 @@ export class HttpServer {
   private configureRoutes(): void {
     const externalController = new ExternalController();
     this.app.use("/companio/external", externalController.router);
-    this.app.use("/api/categories", categoryRoutes);
-    this.app.use("/api/subCategories", subCategoryRoutes);
-    this.app.use("/getListOfSellers", sellerRoutes);
+    this.app.use("/api/categories", new CategoryController().router);
+    this.app.use("/api/subCategories", new SubCategoryController().router);
+    this.app.use("/api/seller", new SellerController().router);
     this.app.get("/cms/health", (req: Request, res: Response) => {
       res.status(200).json({
         status: "UP",

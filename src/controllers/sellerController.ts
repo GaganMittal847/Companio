@@ -16,7 +16,7 @@ export class SellerController{
   }
 
   private configureRoutes(): void {
-     this.router.post('/getListOfSellers', this.getListOfSellers);
+     this.router.get('/getListOfSellers', this.getListOfSellers);
    //  this.router.post('/catRegistration', this.categoryRegistration);
 
   }

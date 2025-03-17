@@ -17,7 +17,7 @@ export class SubCategoryController{
   }
 
   private configureRoutes(): void {
-     this.router.post('/getSubcategories', this.getSubcategories);
+     this.router.get('/getSubcategories', this.getSubcategories);
      this.router.post('/createSubcategory', this.createSubcategory);
      this.router.post('/deleteSubcategory', this.deleteSubcategory);
      this.router.post('/updateSubcategory', this.updateSubcategory);
