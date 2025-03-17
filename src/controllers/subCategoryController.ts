@@ -23,13 +23,17 @@ export class SubCategoryController{
      this.router.post('/updateSubcategory', this.updateSubcategory);
   }
 
-    // Get all subcategories
+// Get all subcategories or filter by categoryId if provided
     private getSubcategories = async (req: Request, res: any) => {
       try {
-        const subcategories = await SubcategoryModel.find();
-        return res
-          .status(HttpStatus.OK)
-          .json(new ApiResponseDto("success", "Subcategories retrieved successfully", subcategories, HttpStatus.OK));
+        
+        const { catId } = req.query;
+        const filter = catId ? { categoryId: catId } : {}; // Filter by categoryId if catId is provided
+        const subcategories = await SubcategoryModel.find(filter);
+
+        return res.status(HttpStatus.OK).json(new ApiResponseDto("success","Subcategories retrieved successfully",
+        subcategories,HttpStatus.OK));
+  
       } catch (error) {
         return res
           .status(HttpStatus.INTERNAL_SERVER_ERROR)
