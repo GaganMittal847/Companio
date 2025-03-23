@@ -143,7 +143,7 @@ export class ExternalController {
 
     private userSignUp = async (req: Request, res: Response): Promise<any>  => {
         try {
-            const { name, mobileNo , type , fcmToken, deviceType , profilePic} = req.body;
+            const { name, mobileNo , type , fcmToken, deviceType , profilePic, geoLocation} = req.body;
             
             if(!name || !mobileNo || !type){
                 return res.status(400).json({ message: 'missing field'});
@@ -160,7 +160,7 @@ export class ExternalController {
 
             const id = "USER" + await this.generateUserId();
             // Create new user
-            const newUser = new UserModel({ name, mobileNo, profilePic, type, fcmToken, deviceType, id });
+            const newUser = new UserModel({ name, mobileNo, profilePic, type, fcmToken, deviceType, id, geoLocation });
             await newUser.save();
 
             // const data: {

@@ -22,8 +22,8 @@ const SignupSchema: Schema = new Schema({
     deviceType: { type: String, required: false },
     media: { type: [String], required: false }, 
     geoLocation: {
-        type: { type: String, enum: ["Point"], required: true, default: "Point" },
-        coordinates: { type: [Number], required: true }, // [longitude, latitude]
+        type: { type: String, enum: ["Point"], required: false, default: "Point" },
+        coordinates: { type: [Number], required: false }, // [longitude, latitude]
     },
     catList: { type: [String], required: false }, 
     subCatList: { type: [String], required: false }, 
@@ -33,7 +33,7 @@ const SignupSchema: Schema = new Schema({
     id: { type: String, required: true, unique: true }
 });
 
-SignupSchema.index({ location: '2dsphere' });
+SignupSchema.index({ geoLocation: '2dsphere' });
 
 export const Counter = mongoose.model('Counter', CounterSchema);
 export const UserModel = mongoose.model<UserEntity>('users', SignupSchema);
