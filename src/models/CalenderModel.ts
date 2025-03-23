@@ -23,6 +23,9 @@ const CalenderSchema: Schema = new Schema(
     categories: [
       {
         categoryID: { type: String, required: true }, // e.g., "Sports", "Food"
+        subCategoryID: { type: String, required: true },
+        weekdayPrice: { type: Number , required: true},
+        weekendPrice: { type: Number , required: true},
         availability: { type: CategoryAvailabilitySchema, required: true },
       },
     ],
