@@ -1,17 +1,25 @@
 // Seller Model interface
+// Seller Model interface
 export interface CalenderEntity extends Document {
-    sellerID: string;
-    name: string;
-    categories: {
-      categoryID: string;
-      subCategoryId: string;
-      availability: {
-        weekdays: { startTime: string, endTime: string, available: boolean }[];
-        weekends: { startTime: string, endTime: string, available: boolean }[];
-      };
-      weekdaysPrice : Number,
-      weekendsPrice : Number,
+  sellerID: string;
+  name: string;
+  categories: {
+    categoryID: string;
+    subCategoryId: string;
+    availability: {
+      days: {
+        date: string; // Date in 'YYYY-MM-DD' format
+        slot:{
+          startTime: string;
+          endTime: string;
+          available: boolean;
+        }
+        available: boolean;
+      }[];
     }[];
-    createdAt?: Date;
-    updatedAt?: Date;
-  }
+    weekdaysPrice: number;
+    weekendsPrice: number;
+  }[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}

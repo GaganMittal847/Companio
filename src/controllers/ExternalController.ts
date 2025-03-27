@@ -244,45 +244,73 @@ export class ExternalController {
 
     private handleSellerCalender = async (req: Request, res: Response): Promise<any> => {
         try {
-            const { sellerName, userId, catId, subCatId, weekdayPrice, weekendPrice, weekendTimeSlots, weekdayTimeSlots } = req.body;
-
-            const calendarData = {
-                // userId,
-                sellerID: userId, // Assuming sellerID is same as userId
-                name: sellerName,
-                categoryID: catId,
-                subCategoryID: subCatId,
-                availability: {
-                    date: new Date().toISOString().split("T")[0], // Current date in ISO format
-                    weekdays: weekdayTimeSlots.map((slot: { startTime: string; endTime: string }) => ({
-                        startTime: slot.startTime,
-                        endTime: slot.endTime,
-                        available: true,
-                        price: weekdayPrice
-                    })),
-                    weekends: weekendTimeSlots.map((slot: { startTime: string; endTime: string }) => ({
-                        startTime: slot.startTime,
-                        endTime: slot.endTime,
-                        available: true,
-                        price: weekendPrice
-                    }))
+            const {
+                sellerName,
+                userId,
+                catId,
+                subCatId,
+                weekdayPrice,
+                weekendPrice,
+                weekendTimeSlots,
+                weekdayTimeSlots,
+            } = req.body;
+    
+            // Prepare the availability data, grouped by specific dates
+            const availabilityData = [
+                {
+                    date: new Date().toISOString().split("T")[0], // Current date in 'YYYY-MM-DD' format
+                    timeslots: [
+                        ...weekdayTimeSlots.map((slot: { startTime: string; endTime: string }) => ({
+                            startTime: slot.startTime,
+                            endTime: slot.endTime,
+                            available: true,
+                        })),
+                        ...weekendTimeSlots.map((slot: { startTime: string; endTime: string }) => ({
+                            startTime: slot.startTime,
+                            endTime: slot.endTime,
+                            available: true,
+                        })),
+                    ],
                 },
-                calendarSetupTime: new Date().toISOString(),
-                updatedAt: new Date()
+            ];
+    
+            // Prepare the calendar data for the update or creation
+            const calendarData = {
+                sellerID: userId, // Assuming sellerID is the same as userId
+                name: sellerName,
+                categories: [
+                    {
+                        categoryID: catId,
+                        subCategoryID: subCatId,
+                        weekdaysPrice: weekdayPrice,
+                        weekendsPrice: weekendPrice,
+                        availability: {
+                            days: availabilityData,
+                        },
+                    },
+                ],
+                createdAt: new Date(),
+                updatedAt: new Date(),
             };
-
+    
+            // Find and update the calendar entry, or insert a new one if it doesn't exist
             const calendarEntry = await CalenderModel.findOneAndUpdate(
-                { userId, categoryID: catId, subCategoryID: subCatId },
+                { sellerID: userId, 'categories.categoryID': catId, 'categories.subCategoryID': subCatId },
                 { $set: { ...calendarData, createdAt: new Date() } },
                 { new: true, upsert: true }
             );
-
-            return res.status(200).json({ success: true, message: "Calendar updated successfully", data: calendarEntry });
+    
+            return res.status(200).json({
+                success: true,
+                message: "Calendar updated successfully",
+                data: calendarEntry,
+            });
         } catch (error) {
             console.error("Error updating calendar: ", error);
             return res.status(500).json({ success: false, message: "Internal Server Error" });
         }
     };
+    
 
 
     private getSellerCalender = async (req: Request, res: Response): Promise<any> => {
