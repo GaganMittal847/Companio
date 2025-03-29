@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-
+// TimeSlot Schema for each timeslot (start time, end time, availability)
 // TimeSlot Schema for each timeslot (start time, end time, availability)
 const TimeSlotSchema: Schema = new Schema({
   startTime: { type: String, required: true }, // e.g., "8:00 AM"
@@ -7,6 +7,7 @@ const TimeSlotSchema: Schema = new Schema({
   available: { type: Boolean, required: true }, // Whether the seller is available during this slot
 });
 
+// Availability schema for each category (days with timeslots)
 // Availability schema for each category (days with timeslots)
 const CategoryAvailabilitySchema: Schema = new Schema({
   days: [
@@ -60,6 +61,5 @@ export interface CalenderEntity extends Document {
   createdAt?: Date;
   updatedAt?: Date;
 }
-
 // Create and export the Calendar model
 export const CalenderModel = mongoose.model<CalenderEntity>('Calender', CalenderSchema);
