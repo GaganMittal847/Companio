@@ -1,264 +1,188 @@
-//import { Router, Request, Response, response, application } from 'express';
-import {Router, Request, Response } from "express";
+import { Router, Request, Response } from "express";
 import { UserModel } from "../models/UserModel";
+import { CalenderModel } from "../models/CalenderModel";
 import { ApiResponseDto } from "../models/Dto/ApiResponseDto";
 import { HttpStatus } from "../constant/constant";
 
-// Get top-rated nearest 50 sellers
+export class SellerController {
+    public router: Router;
 
-export class SellerController{
-
-  public router: Router;
-
-  constructor() {
-      this.router = Router();
-      this.configureRoutes();
-  }
-
-  private configureRoutes(): void {
-     this.router.get('/getListOfSellers', this.getListOfSellers);
-   //  this.router.post('/catRegistration', this.categoryRegistration);
-
-  }
-
-  private getListOfSellers = async (req: Request, res: Response) => {
-    try {
-        console.log("🔹 Incoming request:", JSON.stringify(req.body, null, 2));
-        const { location, filter, sortBy } = req.body;
-
-        if (!location || !location.latitude || !location.longitude) {
-            console.warn("⚠️ Missing latitude/longitude in request.");
-            return res.status(HttpStatus.BAD_REQUEST).json(
-                new ApiResponseDto("fail", "Latitude and longitude are required", null, HttpStatus.BAD_REQUEST)
-            );
-        }
-
-        const { latitude, longitude } = location;
-        let sellers;
-
-        if (filter) {
-            if (this.requiresAggregation(filter)) {
-                // If aggregation is required (price range or calendar filtering)
-                const pipeline = this.buildAggregationPipeline(latitude, longitude, filter, sortBy);
-                sellers = await UserModel.aggregate(pipeline);
-            } else {
-                // If no aggregation is required, use simple filtering
-                sellers = await UserModel.find(this.getFilteredQuery(filter, latitude, longitude), this.getProjectionFields())
-                    .sort(this.getSorting(sortBy))
-                    .limit(50);
-            }
-        } else {
-            // No filters, use base query
-            sellers = await UserModel.find(this.getBaseQuery(latitude, longitude), this.getProjectionFields())
-                .sort(this.getSorting(sortBy))
-                .limit(50);
-        }
-
-        if (!sellers || sellers.length === 0) {
-            console.warn("⚠️ No sellers found.");
-            return res.status(HttpStatus.NOT_FOUND).json(
-                new ApiResponseDto("failure", "No sellers found within 20 km of the given location", undefined, HttpStatus.NOT_FOUND)
-            );
-        }
-
-        console.log("✅ Sellers fetched successfully.");
-        return res.status(HttpStatus.OK).json(
-            new ApiResponseDto("success", "Sellers fetched successfully", sellers, HttpStatus.OK)
-        );
-
-    } catch (error) {
-        console.error("❌ Error in getListOfSellers:", error);
-        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
-            new ApiResponseDto("failure", "Failed to retrieve sellers", undefined, HttpStatus.INTERNAL_SERVER_ERROR)
-        );
+    constructor() {
+        this.router = Router();
+        this.configureRoutes();
     }
-};
 
+    private configureRoutes(): void {
+        this.router.get('/getListOfSellers', this.getListOfSellers);
+    }
 
-    /**
-   * Determines whether aggregation is required.
-   * Aggregation is needed if filtering by price range or calendar availability.
-   * @param filter - The filter object from the request
-   * @returns Boolean - true if aggregation is required, otherwise false
-   */
-  private requiresAggregation(filter: any): boolean {
-    return filter.minPrice !== undefined || filter.maxPrice !== undefined || filter.calender !== undefined;
-  }
+    private getListOfSellers = async (req: Request, res: Response) => {
+        try {
+            console.log("🔹 Incoming request:", JSON.stringify(req.body, null, 2));
+            const { location, filter, sortBy } = req.body;
 
-  /**
-  * Builds an aggregation pipeline for filtering based on price range and calendar availability.
-  * @param latitude - User's latitude
-  * @param longitude - User's longitude
-  * @param filter - Filters from the request
-  * @param sortBy - Sorting criteria
-  * @returns Aggregation pipeline array
-  */
-  private buildAggregationPipeline(latitude: number, longitude: number, filter: any, sortBy: string) {
-    const pipeline: any[] = [
-        {
-            $geoNear: {
-                near: { type: "Point", coordinates: [longitude, latitude] },
-                distanceField: "distance",
-                maxDistance: 20000, // 20km
-                spherical: true,
-            },
-        },
-        { $match: this.getFilterConditions(filter) }, // Apply filters dynamically
-        {
-            $lookup: {
-                from: "calenders",
-                localField: "id",
-                foreignField: "sellerID",
-                as: "calendar",
-            },
-        },
-        { $unwind: "$calendar" }, // Flatten calendar data
-        { $match: this.getCalendarPriceFilter(filter) }, // Apply price range filter if needed
-        { $project: this.getProjectionFields() }, // Select specific fields
-        { $sort: this.getSorting(sortBy) }, // Apply sorting
-        { $limit: 50 }, // Limit results
-    ];
-    console.log("📌 Aggregation Pipeline:", JSON.stringify(pipeline, null, 2));
-    return pipeline;
-  }
+            if (!location || !location.latitude || !location.longitude) {
+                return res.status(HttpStatus.BAD_REQUEST).json(
+                    new ApiResponseDto("fail", "Latitude and longitude are required", null, HttpStatus.BAD_REQUEST)
+                );
+            }
 
-  /**
-  * Returns the query object for simple filtering (when aggregation is not needed).
-  * @param filter - The filter object from the request
-  * @param latitude - User's latitude
-  * @param longitude - User's longitude
-  * @returns MongoDB query object
-  */
-  private getFilteredQuery(filter: any, latitude: number, longitude: number) {
-    const query = {
-        type: "seller",
-        geoLocation: {
-            $near: {
-                $geometry: {
-                    type: "Point",
-                    coordinates: [longitude, latitude],
+            const { latitude, longitude } = location;
+            let sellers;
+            const users = await UserModel.find({});
+            console.log(" Users in the db " + users);
+
+            if (filter) {
+                if (this.requiresAggregation(filter)) {
+                    console.log(" requiresAggregation for this query");
+                    const calenders = await CalenderModel.find({});
+                    console.log(" Calender in the db " + calenders);
+                    const pipeline = this.buildAggregationPipeline(latitude, longitude, filter, sortBy);
+                    sellers = await UserModel.aggregate(pipeline);
+                } else {
+                    console.log("filter wo Aggregation for this query");
+                    sellers = await UserModel.find(this.getFilteredQuery(filter, latitude, longitude), this.getProjectionFields())
+                        .sort(this.getSorting(sortBy))
+                        .limit(50);
+                }
+            } else {
+                sellers = await this.getSellersWithoutFilter(latitude, longitude, sortBy);
+            }
+
+            if (!sellers || sellers.length === 0) {
+                return res.status(HttpStatus.NOT_FOUND).json(
+                    new ApiResponseDto("failure", "No sellers found", undefined, HttpStatus.NOT_FOUND)
+                );
+            }
+
+            return res.status(HttpStatus.OK).json(
+                new ApiResponseDto("success", "Sellers fetched successfully", sellers, HttpStatus.OK)
+            );
+        } catch (error) {
+            console.error("❌ Error in getListOfSellers:", error);
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
+                new ApiResponseDto("failure", "Failed to retrieve sellers", undefined, HttpStatus.INTERNAL_SERVER_ERROR)
+            );
+        }
+    };
+
+    private async getSellersWithoutFilter(latitude: number, longitude: number, sortBy?: string) {
+        return await UserModel.find({
+            type: "seller",
+            geoLocation: {
+                $near: {
+                    $geometry: { type: "Point", coordinates: [longitude, latitude] },
+                    $maxDistance: 80000,
                 },
-                $maxDistance: 20000, // 20km
             },
-        },
-        ...(filter.catList && { catList: { $in: filter.catList } }),
-        ...(filter.subCatList && { subCatList: { $in: filter.subCatList } }),
-        ...(filter.gender && { gender: filter.gender }),
-        ...(filter.minRating && { rating: { $gte: filter.minRating } }),
-    };
+        }, this.getProjectionFields())
+            .sort(this.getSorting(sortBy))
+            .limit(50);
+    }
 
-    console.log("🔍 Generated filtered query:", JSON.stringify(query, null, 2));
-    return query;
-  }
+    private requiresAggregation(filter: any): boolean {
+        return filter.minPrice !== undefined || filter.maxPrice !== undefined || filter.dateRange !== undefined;
+    }
 
-  /**
-  * Returns the query object for basic searches (when no filters are applied).
-  * @param latitude - User's latitude
-  * @param longitude - User's longitude
-  * @returns MongoDB query object
-  */
-  private getBaseQuery(latitude: number, longitude: number) {
-    return {
-        type: "seller",
-        geoLocation: {
-            $near: {
-                $geometry: {
-                    type: "Point",
-                    coordinates: [longitude, latitude],
+    private buildAggregationPipeline(latitude: number, longitude: number, filter: any, sortBy: string) {
+        const pipeline: any[] = [
+            {
+                $geoNear: {
+                    near: { type: "Point", coordinates: [longitude, latitude] },
+                    distanceField: "distance",
+                    spherical: true,
+                    key: "geoLocation"
                 },
-                $maxDistance: 20000, // 20km
             },
-        },
-    };
-  }
+            { $match: this.getFilterConditions(filter) },
+            {
+                $lookup: {
+                    from: "calenders",
+                    localField: "id",
+                    foreignField: "sellerID",
+                    as: "calendar",
+                },
+            },
+            { $unwind: "$calendar" },
+            { $match: this.getCalendarFilter(filter) },
+            { $project: this.getProjectionFields() },
+            { $sort: this.getSorting(sortBy) },
+            { $limit: 50 },
+        ];
+        return pipeline;
+    }
 
-  /**
-  * Returns the filtering conditions for aggregation pipeline.
-  * @param filter - The filter object from the request
-  * @returns MongoDB query object for `$match`
-  */
-  private getFilterConditions(filter: any) {
-    return {
-        ...(filter.catList && { catList: { $in: filter.catList } }),
-        ...(filter.subCatList && { subCatList: { $in: filter.subCatList } }),
-        ...(filter.gender && { gender: filter.gender }),
-        ...(filter.minRating && { rating: { $gte: filter.minRating } }),
-    };
-  }
+    private getFilteredQuery(filter: any, latitude: number, longitude: number) {
+        console.log("query filter " + filter)
 
-  /**
-  * Returns the query for filtering calendar-based price range.
-  * @param filter - The filter object from the request
-  * @returns MongoDB query object for `$match` on calendar data
-  */
-  private getCalendarPriceFilter(filter: any) {
-    if (filter.minPrice !== undefined || filter.maxPrice !== undefined) {
         return {
-            $or: [
-                {
-                    "calendar.categories.weekdayPrice": {
-                        ...(filter.minPrice !== undefined ? { $gte: filter.minPrice } : {}),
-                        ...(filter.maxPrice !== undefined ? { $lte: filter.maxPrice } : {}),
-                    },
+            type: "seller",
+            geoLocation: {
+                $near: {
+                    $geometry: { type: "Point", coordinates: [longitude, latitude] },
+                    $maxDistance: 80000,
                 },
-                {
-                    "calendar.categories.weekendPrice": {
-                        ...(filter.minPrice !== undefined ? { $gte: filter.minPrice } : {}),
-                        ...(filter.maxPrice !== undefined ? { $lte: filter.maxPrice } : {}),
-                    },
-                },
-            ],
+            },
+            ...(filter.catList && { catList: { $in: filter.catList } }),
+            ...(filter.subCatList && { subCatList: { $in: filter.subCatList } }),
+            ...(filter.minRating && { rating: { $gte: filter.minRating } }),
         };
     }
-    return {};
-  }
 
-  /**
-  * Returns the projection fields to optimize the query.
-  * @returns Projection object
-  */
-  private getProjectionFields() {
-    return {
-        name: 1,
-        profilePic: 1,
-        bio: 1,
-        catList: 1,
-        subCatList: 1,
-        fcmToken: 1,
-        media: 1,
-        id: 1,
-        rating: 1,
-        geoLocation: 1,
-    };
-  }
-
-    /**
-   * Determines sorting logic based on sortBy parameter
-   * @param sortBy - Sorting parameter from request
-   * @returns MongoDB sorting object
-   */
-  private getSorting(sortBy?: string): any {
-    let sortCriteria;
-
-    switch (sortBy) {
-        case "highestRating":
-            sortCriteria = { rating: -1 };
-            break;
-        case "nearest":
-            sortCriteria = { "geoLocation.coordinates": 1 };
-            break;
-        case "newest":
-            sortCriteria = { createdAt: -1 };
-            break;
-        default:
-            sortCriteria = { rating: -1 };
+    private getFilterConditions(filter: any) {
+        return {
+            ...(filter.catList && { catList: { $in: filter.catList } }),
+            ...(filter.subCatList && { subCatList: { $in: filter.subCatList } }),
+            ...(filter.gender && { gender: filter.gender }),
+            ...(filter.minRating && { rating: { $gte: filter.minRating } }),
+        };
     }
 
-    console.log("🧩 Sorting applied:", JSON.stringify(sortCriteria, null, 2));
-    return sortCriteria;
-  }
+    private getCalendarFilter(filter: any) {
+        const conditions: any = {};
 
+        if (filter.minPrice !== undefined || filter.maxPrice !== undefined) {
+            conditions["calendar.categories.weekdayPrice"] = {
+                ...(filter.minPrice !== undefined ? { $gte: filter.minPrice } : {}),
+                ...(filter.maxPrice !== undefined ? { $lte: filter.maxPrice } : {}),
+            };
+            conditions["calendar.categories.weekendPrice"] = {
+                ...(filter.minPrice !== undefined ? { $gte: filter.minPrice } : {}),
+                ...(filter.maxPrice !== undefined ? { $lte: filter.maxPrice } : {}),
+            };
+        }
 
+        if (filter.dateRange) {
+            conditions["calendar.categories.availability.days.date"] = {
+                $gte: filter.dateRange.startDate,
+                $lte: filter.dateRange.endDate,
+            };
+        }
 
+        return conditions;
+    }
 
+    private getProjectionFields() {
+        return {
+            name: 1,
+            profilePic: 1,
+            bio: 1,
+            catList: 1,
+            subCatList: 1,
+            fcmToken: 1,
+            media: 1,
+            id: 1,
+            rating: 1,
+            geoLocation: 1,
+        };
+    }
+
+    private getSorting(sortBy?: string): any {
+        const sortOptions: Record<string, any> = {
+            highestRating: { rating: -1 },
+            nearest: { "geoLocation.coordinates": 1 },
+            newest: { createdAt: -1 },
+        };
+        return sortOptions[sortBy] || { rating: -1 };
+    }
 }
