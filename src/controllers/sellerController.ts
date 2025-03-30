@@ -15,7 +15,37 @@ export class SellerController {
 
     private configureRoutes(): void {
         this.router.post('/getListOfSellers', this.getListOfSellers);
+        this.router.get('/getUserDataByID/:userId', this.getUserDataByID);
     }
+
+    private getUserDataByID = async (req: Request, res: Response): Promise<any> => {
+        try {
+            const { userId } = req.params;
+            console.log(`🔹 Fetching user data for ID: ${userId}`);
+
+            // Validate if the user exists
+            const user = await UserModel.findOne({id :  userId, type : 'seller'});
+            if (!user) {
+                return res.status(HttpStatus.NOT_FOUND).json(
+                    new ApiResponseDto("fail", "User not found", null, HttpStatus.NOT_FOUND)
+                );
+            }
+
+            // Fetch calendar data for the user
+            const calendar = await CalenderModel.findOne({ sellerID: userId });
+
+            return res.status(HttpStatus.OK).json(
+                new ApiResponseDto("success", "User data fetched successfully", { user, calendar }, HttpStatus.OK)
+            );
+        } catch (error) {
+            console.error("❌ Error in getUserDataByID:", error);
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
+                new ApiResponseDto("failure", "Failed to fetch user data", undefined, HttpStatus.INTERNAL_SERVER_ERROR)
+            );
+        }
+    };
+
+
 
     private getListOfSellers = async (req: Request, res: Response): Promise<any> => {
         try {
@@ -105,8 +135,6 @@ export class SellerController {
         ];
     }
 
-
-
     private getBaseLookupAndProjection() {
         return [
             {
@@ -164,4 +192,5 @@ export class SellerController {
             newest: { createdAt: -1 },
         }[sortBy] || { rating: -1 };
     }
+
 }
