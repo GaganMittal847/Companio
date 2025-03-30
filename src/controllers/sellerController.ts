@@ -14,7 +14,7 @@ export class SellerController {
     }
 
     private configureRoutes(): void {
-        this.router.get('/getListOfSellers', this.getListOfSellers);
+        this.router.post('/getListOfSellers', this.getListOfSellers);
     }
 
     private getListOfSellers = async (req: Request, res: Response): Promise<any> => {
