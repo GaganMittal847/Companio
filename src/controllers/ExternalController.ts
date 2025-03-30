@@ -255,11 +255,11 @@ export class ExternalController {
                 weekdayTimeSlots,
             } = req.body;
     
-            // Prepare the availability data, grouped by specific dates
+            // Prepare availability data
             const availabilityData = [
                 {
                     date: new Date().toISOString().split("T")[0], // Current date in 'YYYY-MM-DD' format
-                    timeslots: [
+                    slot: [
                         ...weekdayTimeSlots.map((slot: { startTime: string; endTime: string }) => ({
                             startTime: slot.startTime,
                             endTime: slot.endTime,
@@ -271,17 +271,18 @@ export class ExternalController {
                             available: true,
                         })),
                     ],
+                    available: true, // Assuming availability is true if slots exist
                 },
             ];
     
-            // Prepare the calendar data for the update or creation
+            // Prepare calendar data
             const calendarData = {
-                sellerID: userId, // Assuming sellerID is the same as userId
+                sellerID: userId,
                 name: sellerName,
                 categories: [
                     {
                         categoryID: catId,
-                        subCategoryID: subCatId,
+                        subCategoryId: subCatId,
                         weekdaysPrice: weekdayPrice,
                         weekendsPrice: weekendPrice,
                         availability: {
@@ -289,14 +290,13 @@ export class ExternalController {
                         },
                     },
                 ],
-                createdAt: new Date(),
                 updatedAt: new Date(),
             };
     
             // Find and update the calendar entry, or insert a new one if it doesn't exist
             const calendarEntry = await CalenderModel.findOneAndUpdate(
-                { sellerID: userId, 'categories.categoryID': catId, 'categories.subCategoryID': subCatId },
-                { $set: { ...calendarData, createdAt: new Date() } },
+                { sellerID: userId, 'categories.categoryID': catId, 'categories.subCategoryId': subCatId },
+                { $set: { ...calendarData } },
                 { new: true, upsert: true }
             );
     
@@ -316,8 +316,9 @@ export class ExternalController {
     private getSellerCalender = async (req: Request, res: Response): Promise<any> => {
         try {
             const { userId, catId, subCatId } = req.body;
+            const calendar = await CalenderModel.find({});
 
-            const calendar = await CalenderModel.findOne({ userId, categoryID: catId, subCategoryID: subCatId });
+          //  const calendar = await CalenderModel.findOne({ userId, categoryID: catId, subCategoryID: subCatId });
 
             if (!calendar) {
                 return res.status(404).json({ success: false, message: "Calendar not found" });

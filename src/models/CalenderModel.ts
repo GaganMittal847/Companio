@@ -1,4 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { CalenderEntity } from '../entities/CalenderEntity';
+
 // TimeSlot Schema for each timeslot (start time, end time, availability)
 // TimeSlot Schema for each timeslot (start time, end time, availability)
 const TimeSlotSchema: Schema = new Schema({
@@ -37,29 +39,29 @@ const CalenderSchema: Schema = new Schema(
   { timestamps: true } // Automatically adds createdAt and updatedAt fields
 );
 
-// Define the Document interface for MongoDB
-export interface CalenderEntity extends Document {
-  sellerID: string;
-  name: string;
-  categories: {
-    categoryID: string;
-    subCategoryId: string;
-    availability: {
-      days: {
-        date: string; // Date in 'YYYY-MM-DD' format
-        slots: {
-          startTime: string;
-          endTime: string;
-          available: boolean;
-        }[];
-        available: boolean;
-      }[];
-    };
-    weekdaysPrice: number;
-    weekendsPrice: number;
-  }[];
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+// // Define the Document interface for MongoDB
+// export interface CalenderEntity extends Document {
+//   sellerID: string;
+//   name: string;
+//   categories: {
+//     categoryID: string;
+//     subCategoryId: string;
+//     availability: {
+//       days: {
+//         date: string; // Date in 'YYYY-MM-DD' format
+//         slots: {
+//           startTime: string;
+//           endTime: string;
+//           available: boolean;
+//         }[];
+//         available: boolean;
+//       }[];
+//     };
+//     weekdaysPrice: number;
+//     weekendsPrice: number;
+//   }[];
+//   createdAt?: Date;
+//   updatedAt?: Date;
+// }
 // Create and export the Calendar model
 export const CalenderModel = mongoose.model<CalenderEntity>('Calender', CalenderSchema);
