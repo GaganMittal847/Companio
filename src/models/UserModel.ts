@@ -30,7 +30,9 @@ const SignupSchema: Schema = new Schema({
     age: { type: Number, required: false }, // Fixed type issue (should be `Number`, not `number`)
     gender: { type: String, enum: Object.values(Gender), required: false }, // Enum for gender
     bio: { type: String, required: false }, // Fixed `bio` type (should be `String`, not `[String]`)
-    id: { type: String, required: true, unique: true }
+    id: { type: String, required: true, unique: true },
+    rating: { type: mongoose.Types.Decimal128, required: false, default: 0.0 } // Added rating as Decimal128
+
 });
 
 SignupSchema.index({ geoLocation: '2dsphere' });
