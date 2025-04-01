@@ -11,7 +11,7 @@ import { RequestStatus, RequestType, BookingRequest } from '../entities/BookingR
 
 // Get all categories
 
-export class CategoryController{
+export class RequestController{
 
   public router: Router;
 
@@ -22,15 +22,20 @@ export class CategoryController{
 
   private configureRoutes(): void {
      this.router.post('/requestBooking', this.createUnicastBooking);
-     this.router.get('/getRequests', this.getUserRequests);
+     this.router.get('/getRequests/:userId', this.getUserRequests);
 
   }
+
+  //Pending
+  //1. Validation of whether the companion is registered with the given catId and SubCatID
+  //2. Validation of whether the time slot is available or not
+  //3. Validate if the price is correct as per companion profile
 
   private createUnicastBooking = async (req: Request, res: Response): Promise<any> => {
     try {
         console.log("🔹 Incoming request for createRequest:", JSON.stringify(req.body, null, 2));
         const requestData = req.body;
-        const { location, requestId, catId, subCatId, userId, companionId, price, date, slots, finalPrice } = req.body;
+        const { location, catId, subCatId, userId, companionId, price, date, slots, finalPrice } = req.body;
 
         // Validate required fields
         if (!location || !location.latitude || !location.longitude) {
@@ -40,7 +45,7 @@ export class CategoryController{
         }
         
         // Validate required fields
-        const requiredFields = { requestId, catId, subCatId, userId, companionId, price, date, slots, finalPrice };
+        const requiredFields = { catId, subCatId, userId, companionId, price, date, slots, finalPrice };
             for (const [key, value] of Object.entries(requiredFields)) {
                 if (value === undefined || value === null || (Array.isArray(value) && value.length === 0)) {
                     return res.status(HttpStatus.BAD_REQUEST).json(
@@ -86,7 +91,8 @@ export class CategoryController{
         }
 
         // Validate if the user exists
-        const userExists = await UserModel.findById(userId);
+        const userExists = await UserModel.exists({ id: userId, type: "buyer" });
+
         if (!userExists) {
             return res.status(HttpStatus.NOT_FOUND).json(
                 new ApiResponseDto("fail", "User not found", null, HttpStatus.NOT_FOUND)

@@ -8,7 +8,11 @@ const RequestSchema: Schema = new Schema(
       latitude: { type: Number, required: true },
       longitude: { type: Number, required: true },
     },
-    requestId: {type: Number , required: true},
+    requestID: {
+      type: Schema.Types.ObjectId,
+      auto: true, // MongoDB will auto-generate it
+      alias: "_id", // This makes `_id` appear as `requestID`
+    },
     catId: { type: String, required: true },
     subCatId: { type: String, required: true },
     userId: { type: String, required: true },

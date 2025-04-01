@@ -6,10 +6,7 @@ import { ExternalController } from "../controllers/ExternalController";
 import { CategoryController } from "../controllers/categoryController";
 import { SubCategoryController } from "../controllers/subCategoryController";
 import { SellerController } from "../controllers/sellerController";
-
-import { categoryRoutes } from "../";
-import { subCategoryRoutes } from "../routes/subCategoryRoutes";
-import { sellerRoutes } from "../routes/sellerRoutes";
+import { RequestController } from "../controllers/requestController";
 
 export class HttpServer {
   private app: Express;
@@ -56,6 +53,7 @@ export class HttpServer {
     this.app.use("/companio/external", externalController.router);
     this.app.use("/api/categories", new CategoryController().router);
     this.app.use("/api/subCategories", new SubCategoryController().router);
+    this.app.use("/booking", new RequestController().router);
     this.app.use("/api/seller", new SellerController().router);
     this.app.get("/cms/health", (req: Request, res: Response) => {
       res.status(200).json({

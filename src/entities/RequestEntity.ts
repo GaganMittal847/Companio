@@ -1,12 +1,12 @@
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 
 // Booking Entity Interface
 export interface RequestEntity extends Document {
+  requestID: mongoose.Types.ObjectId; 
   location: {
     latitude: number;
     longitude: number;
   };
-  requestId: string;
   catId: string;
   subCatId: string;
   userId: string;
