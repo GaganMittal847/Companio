@@ -7,6 +7,7 @@ import { ApiResponse, HttpStatus } from '../constant/constant';
 import { generateAndReturnToken } from '../middleware/jwtHelper';
 import { CalenderModel } from '../models/CalenderModel';
 import BannerModel from '../models/BannerModel';
+import AddressModel from '../models/AddressModel';
 //import { SignupModel } from '../config/constant/controllers/models/Entities/UserEntity';
 
 
@@ -31,6 +32,8 @@ export class ExternalController {
         this.router.post('/updateCalender', this.handleSellerCalender);
         this.router.get('/getSellerCalender', this.getSellerCalender);
         this.router.get('/getBanners', this.getBanners);
+        this.router.post('/add/Address', this.addAddress);
+        this.router.get('/get/Address', this.getAddress);
 
 
     }
@@ -149,7 +152,7 @@ export class ExternalController {
 
     private userSignUp = async (req: Request, res: Response): Promise<any> => {
         try {
-            const { name, mobileNo, type, fcmToken, deviceType, profilePic,geoLocation } = req.body;
+            const { name, mobileNo, type, fcmToken, deviceType, profilePic, geoLocation } = req.body;
 
             if (!name || !mobileNo || !type) {
                 return res.status(400).json({ message: 'missing field' });
@@ -254,7 +257,7 @@ export class ExternalController {
                 weekendTimeSlots,
                 weekdayTimeSlots,
             } = req.body;
-    
+
             // Prepare availability data
             const availabilityData = [
                 {
@@ -274,7 +277,7 @@ export class ExternalController {
                     available: true, // Assuming availability is true if slots exist
                 },
             ];
-    
+
             // Prepare calendar data
             const calendarData = {
                 sellerID: userId,
@@ -292,14 +295,14 @@ export class ExternalController {
                 ],
                 updatedAt: new Date(),
             };
-    
+
             // Find and update the calendar entry, or insert a new one if it doesn't exist
             const calendarEntry = await CalenderModel.findOneAndUpdate(
                 { sellerID: userId, 'categories.categoryID': catId, 'categories.subCategoryId': subCatId },
                 { $set: { ...calendarData } },
                 { new: true, upsert: true }
             );
-    
+
             return res.status(200).json({
                 success: true,
                 message: "Calendar updated successfully",
@@ -310,7 +313,7 @@ export class ExternalController {
             return res.status(500).json({ success: false, message: "Internal Server Error" });
         }
     };
-    
+
 
 
     private getSellerCalender = async (req: Request, res: Response): Promise<any> => {
@@ -318,7 +321,7 @@ export class ExternalController {
             const { userId, catId, subCatId } = req.body;
             const calendar = await CalenderModel.find({});
 
-          //  const calendar = await CalenderModel.findOne({ userId, categoryID: catId, subCategoryID: subCatId });
+            //  const calendar = await CalenderModel.findOne({ userId, categoryID: catId, subCategoryID: subCatId });
 
             if (!calendar) {
                 return res.status(404).json({ success: false, message: "Calendar not found" });
@@ -333,21 +336,68 @@ export class ExternalController {
 
     private getBanners = async (req: Request, res: Response): Promise<any> => {
         try {
-          const { userId, catId, subCatId } = req.body;
-      
-          const banners = await BannerModel.find().sort({ "banners.weight": -1 });
-      
-          if (!banners) {
-            return res.status(404).json({ success: false, message: "Calendar not found" });
-          }
-      
-          return res.status(200).json({ success: true, message: "Calendar retrieved successfully", data: banners });
-        } catch (error) {
-          console.error("Error retrieving calendar: ", error);
-          return res.status(500).json({ success: false, message: "Internal Server Error" });
-        }
-      };
+            const { userId, catId, subCatId } = req.body;
 
+            const banners = await BannerModel.find().sort({ "banners.weight": -1 });
+
+            if (!banners) {
+                return res.status(404).json({ success: false, message: "Calendar not found" });
+            }
+
+            return res.status(200).json({ success: true, message: "Calendar retrieved successfully", data: banners });
+        } catch (error) {
+            console.error("Error retrieving calendar: ", error);
+            return res.status(500).json({ success: false, message: "Internal Server Error" });
+        }
+    };
+
+    public addAddress = async (req: Request, res: Response): Promise<any> => {
+        try {
+            const { userId, mobileNo, street, city, state, postalCode, country } = req.body;
+
+            // Validate required fields
+            if (!userId || !mobileNo || !street || !city || !state || !postalCode || !country) {
+                return res.status(400).json({
+                    success: false,
+                    message: "All fields (userId, mobileNo, street, city, state, postalCode, country) are required"
+                });
+            }
+
+            const newAddress = new AddressModel({
+                userId,
+                mobileNo,
+                street,
+                city,
+                state,
+                postalCode,
+                country,
+            });
+
+            await newAddress.save();
+
+            return res.status(200).json({ success: true, message: "Address created successfully", data: newAddress });
+        } catch (error) {
+            console.error("Error creating address: ", error);
+            return res.status(500).json({ success: false, message: "Internal Server Error" });
+        }
+    };
+
+
+    public getAddress = async (req: Request, res: Response): Promise<any> => {
+        try {
+            const { userId } = req.params; // Assuming userId is passed as a URL parameter
+            const address = await AddressModel.find({ userId });
+
+            if (!address) {
+                return res.status(404).json({ success: false, message: "Address not found" });
+            }
+
+            return res.status(200).json({ success: true, message: "Address retrieved successfully", data: address });
+        } catch (error) {
+            console.error("Error retrieving address: ", error);
+            return res.status(500).json({ success: false, message: "Internal Server Error" });
+        }
+    };
 }
 
 
