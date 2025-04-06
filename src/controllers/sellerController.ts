@@ -4,6 +4,7 @@ import { ApiResponseDto } from "../models/Dto/ApiResponseDto";
 import { HttpStatus } from "../constant/constant";
 import { PipelineStage } from "mongoose"; // Import this at the top
 import { CalenderModel } from "../models/CalenderModel";
+import { RequestModel } from "../models/RequestModel";
 
 export class SellerController {
     public router: Router;
@@ -16,6 +17,8 @@ export class SellerController {
     private configureRoutes(): void {
         this.router.post('/getListOfSellers', this.getListOfSellers);
         this.router.get('/getUserDataByID/:userId', this.getUserDataByID);
+        this.router.get('/getUsersRequests', this.getUsersRequests);
+        this.router.post('/rejectRequest', this.rejectRequest);
     }
 
     private getUserDataByID = async (req: Request, res: Response): Promise<any> => {
@@ -192,5 +195,71 @@ export class SellerController {
             newest: { createdAt: -1 },
         }[sortBy] || { rating: -1 };
     }
+    
+    private getUsersRequests = async (req: Request, res: Response): Promise<any> => {
+        try {
+          
+            const companionId = req.query.compId;
+    
+            if (!companionId) {
+                return res.status(HttpStatus.BAD_REQUEST).json(
+                    new ApiResponseDto("fail", "companionId (compId) is required", null, HttpStatus.BAD_REQUEST)
+                );
+            }
+    
+            const requests = await RequestModel.find({ companionId, requestStatus: "created" });
+    
+            if (!requests.length) {
+                return res.status(HttpStatus.NOT_FOUND).json(
+                    new ApiResponseDto("failure", "No requests found", undefined, HttpStatus.NOT_FOUND)
+                );
+            }
+    
+            return res.status(HttpStatus.OK).json(
+                new ApiResponseDto("success", "User requests fetched successfully", requests, HttpStatus.OK)
+            );
+        } catch (error) {
+            console.error("❌ Error in getUsersRequests:", error);
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
+                new ApiResponseDto("failure", "Failed to retrieve user requests", undefined, HttpStatus.INTERNAL_SERVER_ERROR)
+            );
+        }
+    };
+
+    private rejectRequest = async (req: Request, res: Response): Promise<any> => {
+        try {
+            console.log("🔹 Incoming request to reject:", JSON.stringify(req.query, null, 2));
+    
+            const reqId = req.query.reqId;
+    
+            if (!reqId) {
+                return res.status(HttpStatus.BAD_REQUEST).json(
+                    new ApiResponseDto("fail", "Request ID (reqId) is required", null, HttpStatus.BAD_REQUEST)
+                );
+            }
+    
+            const request = await RequestModel.findOne({ requestID: reqId });
+    
+            if (!request) {
+                return res.status(HttpStatus.NOT_FOUND).json(
+                    new ApiResponseDto("failure", "Request not found", null, HttpStatus.NOT_FOUND)
+                );
+            }
+    
+            request.requestStatus = "Rejected";
+            await request.save();
+    
+            return res.status(HttpStatus.OK).json(
+                new ApiResponseDto("success", "Request rejected successfully", request, HttpStatus.OK)
+            );
+        } catch (error) {
+            console.error("❌ Error in rejectRequest:", error);
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
+                new ApiResponseDto("failure", "Failed to reject the request", null, HttpStatus.INTERNAL_SERVER_ERROR)
+            );
+        }
+    };
+    
+
 
 }
