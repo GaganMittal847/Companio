@@ -9,12 +9,11 @@ export enum RequestType {
 // Enum for Request Status with lifecycle stages
 export enum RequestStatus {
     // Buyer Action
-    CREATED = 'Created',  // Initial state when buyer creates the request
   
     // Unicast Workflow
     SENT_TO_SELLER = 'Sent to Seller',  // When a request is sent to a single seller
     SELLER_ACCEPTED = 'Seller Accepted',  // Seller accepts the unicast request
-    SELLER_DECLINED = 'Seller Declined',  // Seller declines the unicast request
+    SELLER_REJECTED = 'Seller Rejected',  // Seller declines the unicast request
     
     // Broadcast Workflow
     SENT_TO_MULTIPLE_SELLERS = 'Sent to Multiple Sellers',  // Request sent to multiple sellers (broadcast)

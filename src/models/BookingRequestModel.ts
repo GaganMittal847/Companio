@@ -15,7 +15,7 @@ const BookingRequestSchema: Schema = new Schema(
     requestType: { type: String, enum: Object.values(RequestType), required: false },
     bookingDate: { type: Date , required: true },
     priceRange: { type: PriceRangeSchema, required: true },
-    status: { type: String, enum: Object.values(RequestStatus), default: RequestStatus.CREATED }, // Default to 'Created'
+    status: { type: String, enum: Object.values(RequestStatus) }, // Default to 'Created'
     sellerID: { type: String }, // Required for Unicast type
     comments: { type: String }
    // sellerList :[]

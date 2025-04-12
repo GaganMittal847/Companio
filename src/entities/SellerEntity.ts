@@ -19,6 +19,9 @@ export interface Seller extends Document {
   rating?: string;
   status?: SellerStatus;
   cDt: Date;
+  isLocked: boolean;
+  lockedUntil: Date;
+  lockedAt: Date;
   
   // Add the location field to represent GeoJSON Point
   location?: {

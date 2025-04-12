@@ -5,6 +5,7 @@ import { HttpStatus } from "../constant/constant";
 import { PipelineStage } from "mongoose"; // Import this at the top
 import { CalenderModel } from "../models/CalenderModel";
 import { RequestModel } from "../models/RequestModel";
+import { RequestStatus } from "../entities/RequestEntity";
 
 export class SellerController {
     public router: Router;
@@ -246,7 +247,7 @@ export class SellerController {
                 );
             }
     
-            request.requestStatus = "Rejected";
+            request.requestStatus = RequestStatus.SELLER_REJECTED;
             await request.save();
     
             return res.status(HttpStatus.OK).json(

@@ -7,6 +7,8 @@ import { UserModel } from "../models/UserModel";
 import { ApiResponseDto } from "../models/Dto/ApiResponseDto";
 import  { RequestModel } from "../models/RequestModel"
 import { RequestStatus, RequestType, BookingRequest } from '../entities/BookingRequestEntity'
+import { PaymentStatus } from '../entities/RequestEntity';
+import { SellerModel } from '../models/SellerModel';
 
 
 // Get all categories
@@ -23,6 +25,7 @@ export class RequestController{
   private configureRoutes(): void {
      this.router.post('/requestBooking', this.createUnicastBooking);
      this.router.get('/getRequests/:userId', this.getUserRequests);
+     this.router.post('/accept', this.acceptRequest);
 
   }
 
@@ -117,6 +120,78 @@ export class RequestController{
         );
     }
   };
+
+  private acceptRequest = async (req: Request, res: Response): Promise<any> => {
+    try {
+        console.log("🔹 Incoming request to accept:", JSON.stringify(req.query, null, 2));
+
+        const reqId = req.query.reqId;
+
+        if (!reqId) {
+            return res.status(HttpStatus.BAD_REQUEST).json(
+                new ApiResponseDto("fail", "Request ID (reqId) is required", null, HttpStatus.BAD_REQUEST)
+            );
+        }
+
+        const request = await RequestModel.findOne({ requestID: reqId });
+
+        if (!request) {
+            return res.status(HttpStatus.NOT_FOUND).json(
+                new ApiResponseDto("failure", "Request not found", null, HttpStatus.NOT_FOUND)
+            );
+        }
+
+        request.requestStatus = RequestStatus.SELLER_ACCEPTED;
+        request.paymentStatus = PaymentStatus.PAYMENT_PENDING;
+        const companionId = request.companionId;
+
+        const companion = await SellerModel.findOne({ sellerId : companionId });
+       
+        if (!companion) {
+            return res.status(HttpStatus.NOT_FOUND).json(
+                new ApiResponseDto("failure", "Companion in the request not found", null, HttpStatus.NOT_FOUND)
+            );
+        }
+        
+        //if request date and activity date is same then take the hours difference and lock until 1/3rd of that difference
+        //if different date lock for 6hours
+
+        const currentDate = new Date();
+        const activityDate = new Date(`${request.date}T${request.slots[0]}`);
+        
+        let lockDurationMs = 6 * 60 * 60 * 1000; // default 6 hours
+
+        // If the date is the same, calculate based on slot hours
+        if (
+            currentDate.toDateString() === activityDate.toDateString() &&
+            request.slots.length >= 2
+        ) {
+            const slotStart = new Date(`${request.date}T${request.slots[0]}`);
+            const hourDiff = (currentDate.getTime() - slotStart.getTime()) / (1000 * 60 * 60);
+
+            if (hourDiff > 0) {
+                const lockHours = hourDiff / 3;
+                lockDurationMs = lockHours * 60 * 60 * 1000;
+            }
+        }
+
+        companion.lockedUntil = new Date(Date.now() + lockDurationMs);
+        companion.isLocked = true;
+        companion.lockedAt = new Date();
+
+        await request.save();
+        await companion.save();
+
+        return res.status(HttpStatus.OK).json(
+            new ApiResponseDto("success", "Request rejected successfully", request, HttpStatus.OK)
+        );
+    } catch (error) {
+        console.error("❌ Error in rejectRequest:", error);
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
+            new ApiResponseDto("failure", "Failed to reject the request", null, HttpStatus.INTERNAL_SERVER_ERROR)
+        );
+    }
+};
 
   private validateEntitiesExistence = async (userId: string, companionId: string, catId: string, subCatId: string): Promise<string[]> => {
     const errors: string[] = [];

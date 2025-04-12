@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { SellerStatus, Seller } from '../entities/SellerEntity';
+import { timeStamp } from 'console';
 
 // Seller Schema with Location Coordinates (GeoJSON)
 const SellerSchema: Schema = new Schema(
@@ -18,6 +19,9 @@ const SellerSchema: Schema = new Schema(
       coordinates: { type: [Number], required: true }, // Array of numbers [longitude, latitude]
     },
     cDt: { type: Date, default: Date.now },
+    isLocked: { type: Boolean, default: false },
+    lockedAt: { type: Date, default: null },
+    lockedUntil: { type: Date, default: null } 
   },
   { timestamps: true } // Automatically manage createdAt and updatedAt
 );
