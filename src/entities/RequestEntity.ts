@@ -5,7 +5,7 @@ export enum RequestStatus {
   // Buyer Action
 
   // Unicast Workflow
-  // SENT_TO_SELLER = 'Sent to Seller',  // When a request is sent to a single seller
+  SENT_TO_SELLER = 'Sent to Seller',  // When a request is sent to a single seller
   SELLER_ACCEPTED = 'Seller Accepted',  // Seller accepts the unicast request
   SELLER_REJECTED = 'Seller Rejected',  // Seller declines the unicast request
 

@@ -124,6 +124,7 @@ export class RequestController{
   private acceptRequest = async (req: Request, res: Response): Promise<any> => {
     try {
         console.log("🔹 Incoming request to accept:", JSON.stringify(req.query, null, 2));
+        // console.log(req);
 
         const reqId = req.query.reqId;
 
@@ -141,11 +142,10 @@ export class RequestController{
             );
         }
 
-        request.requestStatus = RequestStatus.SELLER_ACCEPTED;
-        request.paymentStatus = PaymentStatus.PAYMENT_PENDING;
         const companionId = request.companionId;
+        console.log(" companionId " +  companionId); 
 
-        const companion = await SellerModel.findOne({ sellerId : companionId });
+        const companion = await UserModel.findOne({ id : companionId , type: "seller"});
        
         if (!companion) {
             return res.status(HttpStatus.NOT_FOUND).json(
@@ -179,16 +179,19 @@ export class RequestController{
         companion.isLocked = true;
         companion.lockedAt = new Date();
 
+        request.requestStatus = RequestStatus.SELLER_ACCEPTED;
+        request.paymentStatus = PaymentStatus.PAYMENT_PENDING;
+
         await request.save();
         await companion.save();
 
         return res.status(HttpStatus.OK).json(
-            new ApiResponseDto("success", "Request rejected successfully", request, HttpStatus.OK)
+            new ApiResponseDto("success", "Request accepted successfully for the given ID: ", reqId, HttpStatus.OK)
         );
     } catch (error) {
-        console.error("❌ Error in rejectRequest:", error);
+        console.error("❌ Error in accepttRequest:", error);
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
-            new ApiResponseDto("failure", "Failed to reject the request", null, HttpStatus.INTERNAL_SERVER_ERROR)
+            new ApiResponseDto("failure", "Failed to accept the request", null, HttpStatus.INTERNAL_SERVER_ERROR)
         );
     }
 };

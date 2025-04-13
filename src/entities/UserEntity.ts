@@ -14,6 +14,11 @@ export enum Gender {
     OTHER = 'other'
 }
 
+export interface MediaItem {
+    url: string;
+    type: string; // You can further restrict to 'image' | 'video' if needed
+}
+
 export interface UserEntity extends Document {
     name: string;
     mobileNo: string;
@@ -21,7 +26,7 @@ export interface UserEntity extends Document {
     type: 'buyer' | 'seller';
     fcmToken?: string;
     deviceType?: string;
-    media?: string[];
+    media?: MediaItem[];
     catList?: string[];
     subCatList?: string[];
     bio?: string;
@@ -36,4 +41,7 @@ export interface UserEntity extends Document {
     id: string;
     rating?: string;
     status?: SellerStatus;
+    isLocked: boolean;
+    lockedUntil: Date;
+    lockedAt: Date;
 }
