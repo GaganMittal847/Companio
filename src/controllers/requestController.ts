@@ -67,7 +67,7 @@ export class RequestController{
 
         const newRequest = new RequestModel({
             ...req.body,
-            requestStatus: "REQUESTED"
+            requestStatus: RequestStatus.BUYER_SELECTED_SELLER
         });
         await newRequest.save();
 
