@@ -20,7 +20,12 @@ const SignupSchema: Schema = new Schema({
     type: { type: String, enum: ['buyer', 'seller'], required: true },
     fcmToken: { type: String, required: false },
     deviceType: { type: String, required: false },
-    media: { type: [String], required: false }, 
+    media: [
+        {
+            url: { type: String, required: true },
+            type: { type: String, required: true }
+        }
+    ], 
     geoLocation: {
         type: { type: String, enum: ["Point"], required: false, default: "Point" },
         coordinates: { type: [Number], required: false }, // [longitude, latitude]
@@ -31,8 +36,10 @@ const SignupSchema: Schema = new Schema({
     gender: { type: String, enum: Object.values(Gender), required: false }, // Enum for gender
     bio: { type: String, required: false }, // Fixed `bio` type (should be `String`, not `[String]`)
     id: { type: String, required: true, unique: true },
-    rating: { type: mongoose.Types.Decimal128, required: false, default: 0.0 } // Added rating as Decimal128
-
+    rating: { type: mongoose.Types.Decimal128, required: false, default: 0.0 }, // Added rating as Decimal128
+    isLocked: { type: Boolean, default: false },
+    lockedAt: { type: Date, default: null },
+    lockedUntil: { type: Date, default: null } 
 });
 
 SignupSchema.index({ geoLocation: '2dsphere' });
