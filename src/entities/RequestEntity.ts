@@ -42,7 +42,10 @@ export interface RequestEntity extends Document {
   comments?: string; // Optional
   price: number;
   date: string; // Format: YYYY-MM-DD
-  slots: string[];
+  slots: {
+    startTime: string;
+    endTime: string;
+  }[];
   finalPrice: number;
   createdAt?: Date;
   updatedAt?: Date;

@@ -20,7 +20,15 @@ const RequestSchema: Schema = new Schema(
     comments: { type: String, required: false }, // Optional field
     price: { type: Number, required: true },
     date: { type: String, required: true }, // Stored as 'YYYY-MM-DD'
-    slots: { type: [String], required: true }, // Array of strings
+    slots: {
+      type: [
+        {
+          startTime: { type: String, required: true },
+          endTime: { type: String, required: true }
+        }
+      ],
+      required: true
+    },
     finalPrice: { type: Number, required: true },
     addressId: { type: Number, required: true},
     address: { type: String, required: true },

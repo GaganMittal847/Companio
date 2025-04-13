@@ -7,6 +7,7 @@ const TimeSlotSchema: Schema = new Schema({
   startTime: { type: String, required: true }, // e.g., "8:00 AM"
   endTime: { type: String, required: true },   // e.g., "10:00 AM"
   available: { type: Boolean, required: true }, // Whether the seller is available during this slot
+  isLocked: { type: Boolean, required: true }
 });
 
 // Availability schema for each category (days with timeslots)

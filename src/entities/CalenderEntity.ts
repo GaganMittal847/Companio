@@ -13,6 +13,7 @@ export interface CalenderEntity extends Document {
           startTime: string;
           endTime: string;
           available: boolean;
+          isLocked: boolean;
         }
         available: boolean;
       }[];
