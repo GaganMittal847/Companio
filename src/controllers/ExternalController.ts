@@ -353,10 +353,10 @@ export class ExternalController {
 
     public addAddress = async (req: Request, res: Response): Promise<any> => {
         try {
-            const { userId, mobileNo, street, city, state, postalCode, country } = req.body;
+            const { userId, address, city, state, postalCode, country } = req.body;
 
             // Validate required fields
-            if (!userId || !mobileNo || !street || !city || !state || !postalCode || !country) {
+            if (!userId || !address || !city || !state || !postalCode || !country) {
                 return res.status(400).json({
                     success: false,
                     message: "All fields (userId, mobileNo, street, city, state, postalCode, country) are required"
@@ -365,8 +365,7 @@ export class ExternalController {
 
             const newAddress = new AddressModel({
                 userId,
-                mobileNo,
-                street,
+                address,
                 city,
                 state,
                 postalCode,
@@ -385,7 +384,7 @@ export class ExternalController {
 
     public getAddress = async (req: Request, res: Response): Promise<any> => {
         try {
-            const { userId } = req.params; // Assuming userId is passed as a URL parameter
+            const userId = req.query.userId; // Assuming userId is passed as a URL parameter
             const address = await AddressModel.find({ userId });
 
             if (!address) {

@@ -38,7 +38,7 @@ export class RequestController{
     try {
         console.log("🔹 Incoming request for createRequest:", JSON.stringify(req.body, null, 2));
         const requestData = req.body;
-        const { location, catId, subCatId, userId, companionId, price, date, slots, finalPrice } = req.body;
+        const { location, catId, subCatId, userId, companionId, price, date, slots, finalPrice , addressId , address } = req.body;
 
         // Validate required fields
         if (!location || !location.latitude || !location.longitude) {
@@ -48,7 +48,7 @@ export class RequestController{
         }
         
         // Validate required fields
-        const requiredFields = { catId, subCatId, userId, companionId, price, date, slots, finalPrice };
+        const requiredFields = { catId, subCatId, userId, companionId, price, date, slots, finalPrice , addressId , address};
             for (const [key, value] of Object.entries(requiredFields)) {
                 if (value === undefined || value === null || (Array.isArray(value) && value.length === 0)) {
                     return res.status(HttpStatus.BAD_REQUEST).json(

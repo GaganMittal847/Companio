@@ -22,6 +22,8 @@ const RequestSchema: Schema = new Schema(
     date: { type: String, required: true }, // Stored as 'YYYY-MM-DD'
     slots: { type: [String], required: true }, // Array of strings
     finalPrice: { type: Number, required: true },
+    addressId: { type: Number, required: true},
+    address: { type: String, required: true },
     requestStatus: {type: String, enum: Object.values(RequestStatus)},
     paymentStatus: { type: String, enum: Object.values(PaymentStatus),}
   },
