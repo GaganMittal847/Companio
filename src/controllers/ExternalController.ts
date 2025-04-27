@@ -194,49 +194,44 @@ export class ExternalController {
 
     private profileSetup = async (req: Request, res: Response): Promise<any> => {
         try {
-            const { age, gender, userId, profilePic, location, bio } = req.body;
-
-            // Validate required fields
-            if (!userId || !age || !gender || !profilePic || !location || !bio) {
-                return res.status(400).json({ message: "All fields (userId, profilePic, location, bio) are required." });
+            const { userId, age, gender, profilePic, location, bio } = req.body;
+    
+            if (!userId) {
+                return res.status(400).json({ message: "userId is required." });
             }
-
-            // Find the user
+    
             const user = await UserModel.findOne({ id: userId });
-
             if (!user) {
                 return res.status(404).json({ message: "User not found." });
             }
-
-            // Update user fields
-            user.profilePic = profilePic;
-            user.bio = bio;
-            user.age = age;
-            user.gender = gender;
-            // if (!user.geoLocation) {
-            user.geoLocation = { type: "Point", coordinates: [] }; // Ensure geoLocation exists
-            // }
-
-            user.geoLocation.coordinates = [location.longitude, location.latitude];
-            // if (location.latitude && location.latitude) {
-            //     user.geoLocation? = {
-            //         latitude: location.latitude,
-            //         longitude: location.longitude,
-            //     };
-            // } else {
-            //     return res.status(400).json({ message: "Invalid location format. Latitude and Longitude are required." });
-            // }
-
-            // Save updated user
-            await user.save();
-
+    
+            const updates: Partial<typeof user> = {};
+    
+            if (age !== undefined) updates.age = age;
+            if (gender !== undefined) updates.gender = gender;
+            if (profilePic !== undefined) updates.profilePic = profilePic;
+            if (bio !== undefined) updates.bio = bio;
+    
+            if (location?.longitude !== undefined && location?.latitude !== undefined) {
+                updates.geoLocation = {
+                    type: "Point",
+                    coordinates: [location.longitude, location.latitude],
+                };
+            }
+    
+            // Update only if there are fields to update
+            if (Object.keys(updates).length > 0) {
+                Object.assign(user, updates);
+                await user.save();
+            }
+    
             return res.status(200).json({ message: "Profile updated successfully.", user });
-
-        } catch (error) {
-            console.error("Error in profile setup:", error);
-            return res.status(500).json({ message: "Internal server error.", error });
+        } catch (error: any) {
+            console.error("Error in profileSetup:", error);
+            return res.status(500).json({ message: "Internal server error.", error: error?.message || "Unknown error" });
         }
     };
+    
 
     // private categoryRegistration = async (req: Request, res: Response): Promise<any> => {
 
