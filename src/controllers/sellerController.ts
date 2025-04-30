@@ -28,7 +28,7 @@ export class SellerController {
             console.log(`🔹 Fetching user data for ID: ${userId}`);
 
             // Validate if the user exists
-            const user = await UserModel.findOne({id :  userId, type : 'seller'});
+            const user = await UserModel.findOne({id :  userId });
             if (!user) {
                 return res.status(HttpStatus.NOT_FOUND).json(
                     new ApiResponseDto("fail", "User not found", null, HttpStatus.NOT_FOUND)
