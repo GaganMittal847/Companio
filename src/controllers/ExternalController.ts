@@ -243,80 +243,54 @@ export class ExternalController {
     private handleSellerCalender = async (req: Request, res: Response): Promise<any> => {
         try {
             const {
-                sellerName,
-                userId,
-                catId,
-                subCatId,
-                weekdayPrice,
-                weekendPrice,
-                weekendTimeSlots,
-                weekdayTimeSlots,
+                sellerID,
+                name,
+                categories
             } = req.body;
-
-            // Prepare availability data
-            const availabilityData = [
-                {
-                    date: new Date().toISOString().split("T")[0], // Current date in 'YYYY-MM-DD' format
-                    slot: [
-                        ...weekdayTimeSlots.map((slot: { startTime: string; endTime: string }) => ({
-                            startTime: slot.startTime,
-                            endTime: slot.endTime,
-                            available: true,
-                        })),
-                        ...weekendTimeSlots.map((slot: { startTime: string; endTime: string }) => ({
-                            startTime: slot.startTime,
-                            endTime: slot.endTime,
-                            available: true,
-                        })),
-                    ],
-                    available: true, // Assuming availability is true if slots exist
-                },
-            ];
-
+    
+            // Basic validation (optional but recommended)
+            if (!sellerID || !name || !Array.isArray(categories)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Missing required fields: sellerID, name, or categories"
+                });
+            }
+    
             // Prepare calendar data
             const calendarData = {
-                sellerID: userId,
-                name: sellerName,
-                categories: [
-                    {
-                        categoryID: catId,
-                        subCategoryId: subCatId,
-                        weekdaysPrice: weekdayPrice,
-                        weekendsPrice: weekendPrice,
-                        availability: {
-                            days: availabilityData,
-                        },
-                    },
-                ],
-                updatedAt: new Date(),
+                sellerID,
+                name,
+                categories,
+                updatedAt: new Date()
             };
-
-            // Find and update the calendar entry, or insert a new one if it doesn't exist
+    
+            // Find and update or insert a new document
             const calendarEntry = await CalenderModel.findOneAndUpdate(
-                { sellerID: userId, 'categories.categoryID': catId, 'categories.subCategoryId': subCatId },
-                { $set: { ...calendarData } },
+                { sellerID },
+                { $set: calendarData },
                 { new: true, upsert: true }
             );
-
+    
             return res.status(200).json({
                 success: true,
                 message: "Calendar updated successfully",
-                data: calendarEntry,
+                data: calendarEntry
             });
+    
         } catch (error) {
             console.error("Error updating calendar: ", error);
             return res.status(500).json({ success: false, message: "Internal Server Error" });
         }
     };
-
+    
 
 
     private getSellerCalender = async (req: Request, res: Response): Promise<any> => {
         try {
             const { userId, catId, subCatId } = req.body;
-            const calendar = await CalenderModel.find({});
+           // const calendar = await CalenderModel.find({});
 
-            //  const calendar = await CalenderModel.findOne({ userId, categoryID: catId, subCategoryID: subCatId });
+            const calendar = await CalenderModel.findOne({ userId, categoryID: catId, subCategoryID: subCatId });
 
             if (!calendar) {
                 return res.status(404).json({ success: false, message: "Calendar not found" });
