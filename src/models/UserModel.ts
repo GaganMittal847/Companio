@@ -30,8 +30,27 @@ const SignupSchema: Schema = new Schema({
         type: { type: String, enum: ["Point"], required: false, default: "Point" },
         coordinates: { type: [Number], required: false }, // [longitude, latitude]
     },
-    catList: { type: [String], required: false }, 
-    subCatList: { type: [String], required: false }, 
+    catList: {
+        type: [
+          {
+            catId: { type: String, required: true },
+            catName: { type: String, required: true },
+            catImage: { type: String, required: true },
+          }
+        ],
+        required: false
+      },
+      subCatList: {
+        type: [
+          {
+            catId: { type: String, required: true },
+            subCatId: { type: String, required: true },
+            subCatName: { type: String, required: true },
+            subCatImage: { type: String, required: true },
+          }
+        ],
+        required: false
+      },
     age: { type: Number, required: false }, // Fixed type issue (should be `Number`, not `number`)
     gender: { type: String, enum: Object.values(Gender), required: false }, // Enum for gender
     bio: { type: String, required: false }, // Fixed `bio` type (should be `String`, not `[String]`)

@@ -14,7 +14,7 @@ export interface CalenderEntity extends Document {
           endTime: string;
           available: boolean;
           isLocked: boolean;
-        }
+        };
         available: boolean;
       }[];
     }[];

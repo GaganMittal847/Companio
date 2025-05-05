@@ -194,7 +194,7 @@ export class ExternalController {
 
     private profileSetup = async (req: Request, res: Response): Promise<any> => {
         try {
-            const { userId, age, gender, profilePic, location, bio } = req.body;
+            const { userId, age, gender, profilePic, location, bio, catList , subCatList } = req.body;
     
             if (!userId) {
                 return res.status(400).json({ message: "userId is required." });
@@ -211,6 +211,8 @@ export class ExternalController {
             if (gender !== undefined) updates.gender = gender;
             if (profilePic !== undefined) updates.profilePic = profilePic;
             if (bio !== undefined) updates.bio = bio;
+            updates.catList = catList;
+            updates.subCatList = subCatList;
     
             if (location?.longitude !== undefined && location?.latitude !== undefined) {
                 updates.geoLocation = {
@@ -242,39 +244,69 @@ export class ExternalController {
 
     private handleSellerCalender = async (req: Request, res: Response): Promise<any> => {
         try {
-            const {
-                sellerID,
-                name,
-                categories
-            } = req.body;
+            const { sellerID, name, categories } = req.body;
     
-            // Basic validation (optional but recommended)
-            if (!sellerID || !name || !Array.isArray(categories)) {
+            if (!sellerID || !name || !Array.isArray(categories) || categories.length === 0) {
                 return res.status(400).json({
                     success: false,
                     message: "Missing required fields: sellerID, name, or categories"
                 });
             }
     
-            // Prepare calendar data
-            const calendarData = {
-                sellerID,
-                name,
-                categories,
-                updatedAt: new Date()
-            };
+            const incomingCategory = categories[0]; // handling single category at a time
+            const { categoryID, subCategoryId } = incomingCategory;
     
-            // Find and update or insert a new document
-            const calendarEntry = await CalenderModel.findOneAndUpdate(
-                { sellerID },
-                { $set: calendarData },
-                { new: true, upsert: true }
-            );
+            // First check if seller + category exists
+            const calendarDoc = await CalenderModel.findOne({
+                sellerID,
+                'categories.categoryID': categoryID,
+                'categories.subCategoryId': subCategoryId,
+            });
+    
+            let updatedCalendar;
+    
+            if (calendarDoc) {
+                // Update specific category in the array
+                const categoryIndex = calendarDoc.categories.findIndex(
+                    (cat) => cat.categoryID === categoryID && cat.subCategoryId === subCategoryId
+                );
+    
+                if (categoryIndex > -1) {
+                    calendarDoc.categories[categoryIndex] = {
+                        ...calendarDoc.categories[categoryIndex],
+                        ...incomingCategory
+                    };
+                    calendarDoc.name = name;
+                    calendarDoc.updatedAt = new Date();
+                    updatedCalendar = await calendarDoc.save();
+                }
+            } else {
+                // Check if seller exists without this category
+                const sellerDoc = await CalenderModel.findOne({ sellerID });
+    
+                if (sellerDoc) {
+                    // Seller exists, maybe has empty or unrelated categories — add new one
+                    sellerDoc.categories = sellerDoc.categories || [];
+                    sellerDoc.categories.push(incomingCategory);
+                    sellerDoc.name = name;
+                    sellerDoc.updatedAt = new Date();
+                    updatedCalendar = await sellerDoc.save();
+                } else {
+                    // Seller doesn't exist — create new document
+                    updatedCalendar = await CalenderModel.create({
+                        sellerID,
+                        name,
+                        categories: [incomingCategory],
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                    });
+                }
+            }
     
             return res.status(200).json({
                 success: true,
                 message: "Calendar updated successfully",
-                data: calendarEntry
+                data: updatedCalendar,
             });
     
         } catch (error) {
@@ -290,7 +322,11 @@ export class ExternalController {
             const { userId, catId, subCatId } = req.body;
            // const calendar = await CalenderModel.find({});
 
-            const calendar = await CalenderModel.findOne({ userId, categoryID: catId, subCategoryID: subCatId });
+           const calendar = await CalenderModel.findOne({
+            sellerID: userId,
+            'categories.categoryID': catId,
+            'categories.subCategoryId': subCatId,
+            });
 
             if (!calendar) {
                 return res.status(404).json({ success: false, message: "Calendar not found" });

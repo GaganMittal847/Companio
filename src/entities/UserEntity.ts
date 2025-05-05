@@ -27,8 +27,17 @@ export interface UserEntity extends Document {
     fcmToken?: string;
     deviceType?: string;
     media?: MediaItem[];
-    catList?: string[];
-    subCatList?: string[];
+    catList?: {
+        catId : string,
+        catName : string,
+        catImage : string
+    }[];
+    subCatList?: {
+        catId : string,
+        subCatId : string,
+        subCatName : string,
+        subCatImage : string
+    }[];
     bio?: string;
     geoLocation?: {
         type:string;
