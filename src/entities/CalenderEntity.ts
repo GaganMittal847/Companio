@@ -5,7 +5,6 @@ export interface CalenderEntity extends Document {
   name: string;
   categories: {
     categoryID: string;
-    subCategoryId: string;
     availability: {
       days: {
         date: string; // Date in 'YYYY-MM-DD' format

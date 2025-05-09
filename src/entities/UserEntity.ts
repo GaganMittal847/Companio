@@ -48,6 +48,9 @@ export interface UserEntity extends Document {
     cDt: Date;
     uDt: Date;
     id: string;
+    pronoun: string;
+    work: string;
+    language: string;
     rating?: string;
     status?: SellerStatus;
     isLocked: boolean;

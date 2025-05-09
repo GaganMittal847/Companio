@@ -5,4 +5,10 @@ export interface AddressEntity extends Document {
     state: string;
     postalCode: string;
     country: string;
+    name: string;
+    mobileNo: string;
+    geoLocation?: {
+        type:string;
+        coordinates: number[];
+    };
 }

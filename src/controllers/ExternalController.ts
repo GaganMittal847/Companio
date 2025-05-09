@@ -194,7 +194,7 @@ export class ExternalController {
 
     private profileSetup = async (req: Request, res: Response): Promise<any> => {
         try {
-            const { userId, age, gender, profilePic, location, bio, catList , subCatList } = req.body;
+            const { userId, age, gender, profilePic, location, bio, catList , subCatList , pronoun , work , language } = req.body;
     
             if (!userId) {
                 return res.status(400).json({ message: "userId is required." });
@@ -213,6 +213,10 @@ export class ExternalController {
             if (bio !== undefined) updates.bio = bio;
             updates.catList = catList;
             updates.subCatList = subCatList;
+
+            user.pronoun = pronoun;
+            user.work = work;
+            user.language = language;
     
             if (location?.longitude !== undefined && location?.latitude !== undefined) {
                 updates.geoLocation = {
@@ -259,8 +263,7 @@ export class ExternalController {
             // First check if seller + category exists
             const calendarDoc = await CalenderModel.findOne({
                 sellerID,
-                'categories.categoryID': categoryID,
-                'categories.subCategoryId': subCategoryId,
+                'categories.categoryID': categoryID
             });
     
             let updatedCalendar;
@@ -268,7 +271,7 @@ export class ExternalController {
             if (calendarDoc) {
                 // Update specific category in the array
                 const categoryIndex = calendarDoc.categories.findIndex(
-                    (cat) => cat.categoryID === categoryID && cat.subCategoryId === subCategoryId
+                    (cat) => cat.categoryID === categoryID 
                 );
     
                 if (categoryIndex > -1) {
@@ -324,8 +327,7 @@ export class ExternalController {
 
            const calendar = await CalenderModel.findOne({
             sellerID: userId,
-            'categories.categoryID': catId,
-            'categories.subCategoryId': subCatId,
+            'categories.categoryID': catId
             });
 
             if (!calendar) {
@@ -358,15 +360,19 @@ export class ExternalController {
 
     public addAddress = async (req: Request, res: Response): Promise<any> => {
         try {
-            const { userId, address, city, state, postalCode, country } = req.body;
+            const { userId, address, city, state, postalCode, country , mobileNo , location , name  } = req.body;
 
             // Validate required fields
-            if (!userId || !address || !city || !state || !postalCode || !country) {
+            if (!userId || !address || !city || !state || !postalCode || !country || !mobileNo || !location || !name) {
                 return res.status(400).json({
                     success: false,
                     message: "All fields (userId, mobileNo, street, city, state, postalCode, country) are required"
                 });
             }
+            const geoLocation = {
+                type: "Point",
+                coordinates: [location.longitude, location.latitude],
+            };
 
             const newAddress = new AddressModel({
                 userId,
@@ -375,6 +381,9 @@ export class ExternalController {
                 state,
                 postalCode,
                 country,
+                name,
+                mobileNo,
+                geoLocation
             });
 
             await newAddress.save();

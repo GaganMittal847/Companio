@@ -55,6 +55,9 @@ const SignupSchema: Schema = new Schema({
     gender: { type: String, enum: Object.values(Gender), required: false }, // Enum for gender
     bio: { type: String, required: false }, // Fixed `bio` type (should be `String`, not `[String]`)
     id: { type: String, required: true, unique: true },
+    pronoun: { type : String , required : false},
+    work: {type : String , required : false},
+    language: {type : String , required : false},
     rating: { type: mongoose.Types.Decimal128, required: false, default: 0.0 }, // Added rating as Decimal128
     isLocked: { type: Boolean, default: false },
     lockedAt: { type: Date, default: null },
