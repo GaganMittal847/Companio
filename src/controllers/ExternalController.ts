@@ -216,10 +216,10 @@ export class ExternalController {
             if (catList !== undefined) updates.catList = catList;
             if (subCatList !== undefined) updates.subCatList = subCatList;
             
-            if (pronoun !== undefined) user.pronoun = pronoun;
-            if (work !== undefined) user.work = work;
-            if (language !== undefined) user.language = language;
-            if (media !== undefined) user.media = media;
+            if (pronoun !== undefined) updates.pronoun = pronoun;
+            if (work !== undefined) updates.work = work;
+            if (language !== undefined) updates.language = language;
+            if (media !== undefined) updates.media = media;
     
             if (location?.longitude !== undefined && location?.latitude !== undefined) {
                 updates.geoLocation = {
