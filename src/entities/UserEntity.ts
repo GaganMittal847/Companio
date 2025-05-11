@@ -26,7 +26,7 @@ export interface UserEntity extends Document {
     type: 'buyer' | 'seller';
     fcmToken?: string;
     deviceType?: string;
-    media?: MediaItem[];
+    media?: string[];
     catList?: {
         catId : string,
         catName : string,

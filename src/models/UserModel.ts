@@ -20,12 +20,7 @@ const SignupSchema: Schema = new Schema({
     type: { type: String, enum: ['buyer', 'seller'], required: true },
     fcmToken: { type: String, required: false },
     deviceType: { type: String, required: false },
-    media: [
-        {
-            url: { type: String, required: true },
-            type: { type: String, required: true }
-        }
-    ], 
+    media: { type: [String] , required: false}, 
     geoLocation: {
         type: { type: String, enum: ["Point"], required: false, default: "Point" },
         coordinates: { type: [Number], required: false }, // [longitude, latitude]

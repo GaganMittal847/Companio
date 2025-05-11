@@ -194,7 +194,7 @@ export class ExternalController {
 
     private profileSetup = async (req: Request, res: Response): Promise<any> => {
         try {
-            const { userId, age, gender, profilePic, location, bio, catList , subCatList , pronoun , work , language ,media } = req.body;
+            const { userId, age, gender, profilePic, location, bio, catList , subCatList , pronoun , work , language , name ,media } = req.body;
     
             if (!userId) {
                 return res.status(400).json({ message: "userId is required." });
@@ -218,6 +218,7 @@ export class ExternalController {
             user.work = work;
             user.language = language;
             user.media = media;
+            user.name = name;
     
             if (location?.longitude !== undefined && location?.latitude !== undefined) {
                 updates.geoLocation = {
