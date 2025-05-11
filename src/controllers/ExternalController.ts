@@ -211,14 +211,14 @@ export class ExternalController {
             if (gender !== undefined) updates.gender = gender;
             if (profilePic !== undefined) updates.profilePic = profilePic;
             if (bio !== undefined) updates.bio = bio;
+            if (name !== undefined) updates.name = name;
             updates.catList = catList;
             updates.subCatList = subCatList;
 
-            user.pronoun = pronoun;
-            user.work = work;
-            user.language = language;
-            user.media = media;
-            user.name = name;
+            user.pronoun = pronoun || "";
+            user.work = work || "";
+            user.language = language || "";
+            user.media = media || [];
     
             if (location?.longitude !== undefined && location?.latitude !== undefined) {
                 updates.geoLocation = {
