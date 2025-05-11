@@ -64,7 +64,7 @@ export class SellerController {
 
             const { latitude, longitude } = location;
             let sellers;
-            const users = await UserModel.find();
+            const users = await UserModel.find({type : 'seller'});
             console.log('Users in the db are ' + users);
             if (filter) {
                 if (this.requiresAggregation(filter)) {
