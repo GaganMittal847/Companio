@@ -46,6 +46,7 @@ export class ExternalController {
         try {
             const mobileNumber = req.body.mobile_number;
             const otp = req.body.otp;
+            const type = req.body.type;
             const comp_otp = await LoginEntity.findOne({
                 mobileNo: mobileNumber,
             });
@@ -70,7 +71,7 @@ export class ExternalController {
                     comp_otp.otp = null;
                     await comp_otp.save();
 
-                    const user = await UserModel.findOne({ mobileNo: mobileNumber });
+                    const user = await UserModel.findOne({ mobileNo: mobileNumber , type});
 
                     apiResponseDto.status = ApiResponse.SUCCESS;
                     apiResponseDto.message = ApiResponse.OTP_VERIFIED;
