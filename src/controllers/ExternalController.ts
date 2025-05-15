@@ -71,7 +71,7 @@ export class ExternalController {
                     comp_otp.otp = null;
                     await comp_otp.save();
 
-                    const user = await UserModel.findOne({ mobileNo: mobileNumber , type});
+                    const user = await UserModel.findOne({ mobileNo: mobileNumber, type });
 
                     apiResponseDto.status = ApiResponse.SUCCESS;
                     apiResponseDto.message = ApiResponse.OTP_VERIFIED;
@@ -195,53 +195,53 @@ export class ExternalController {
 
     private profileSetup = async (req: Request, res: Response): Promise<any> => {
         try {
-            const { userId, age, gender, profilePic, location, bio, catList , subCatList , pronoun , work , language , name ,media } = req.body;
-    
+            const { userId, age, gender, profilePic, location, bio, catList, subCatList, pronoun, work, language, name, media } = req.body;
+
             if (!userId) {
                 return res.status(400).json({ message: "userId is required." });
             }
-    
+
             const user = await UserModel.findOne({ id: userId });
             if (!user) {
                 return res.status(404).json({ message: "User not found." });
             }
-    
+
             const updates: Partial<typeof user> = {};
-    
+
             if (age !== undefined) updates.age = age;
             if (gender !== undefined) updates.gender = gender;
             if (profilePic !== undefined) updates.profilePic = profilePic;
             if (bio !== undefined) updates.bio = bio;
             if (name !== undefined) updates.name = name;
-            
+
             if (catList !== undefined) updates.catList = catList;
             if (subCatList !== undefined) updates.subCatList = subCatList;
-            
+
             if (pronoun !== undefined) updates.pronoun = pronoun;
             if (work !== undefined) updates.work = work;
             if (language !== undefined) updates.language = language;
             if (media !== undefined) updates.media = media;
-    
+
             if (location?.longitude !== undefined && location?.latitude !== undefined) {
                 updates.geoLocation = {
                     type: "Point",
                     coordinates: [location.longitude, location.latitude],
                 };
             }
-    
+
             // Update only if there are fields to update
             if (Object.keys(updates).length > 0) {
                 Object.assign(user, updates);
                 await user.save();
             }
-    
+
             return res.status(200).json({ message: "Profile updated successfully.", user });
         } catch (error: any) {
             console.error("Error in profileSetup:", error);
             return res.status(500).json({ message: "Internal server error.", error: error?.message || "Unknown error" });
         }
     };
-    
+
 
     // private categoryRegistration = async (req: Request, res: Response): Promise<any> => {
 
@@ -253,31 +253,31 @@ export class ExternalController {
     private handleSellerCalender = async (req: Request, res: Response): Promise<any> => {
         try {
             const { sellerID, name, categories } = req.body;
-    
+
             if (!sellerID || !name || !Array.isArray(categories) || categories.length === 0) {
                 return res.status(400).json({
                     success: false,
                     message: "Missing required fields: sellerID, name, or categories"
                 });
             }
-    
+
             const incomingCategory = categories[0]; // handling single category at a time
             const { categoryID, subCategoryId } = incomingCategory;
-    
+
             // First check if seller + category exists
             const calendarDoc = await CalenderModel.findOne({
                 sellerID,
                 'categories.categoryID': categoryID
             });
-    
+
             let updatedCalendar;
-    
+
             if (calendarDoc) {
                 // Update specific category in the array
                 const categoryIndex = calendarDoc.categories.findIndex(
-                    (cat) => cat.categoryID === categoryID 
+                    (cat) => cat.categoryID === categoryID
                 );
-    
+
                 if (categoryIndex > -1) {
                     calendarDoc.categories[categoryIndex] = {
                         ...calendarDoc.categories[categoryIndex],
@@ -290,7 +290,7 @@ export class ExternalController {
             } else {
                 // Check if seller exists without this category
                 const sellerDoc = await CalenderModel.findOne({ sellerID });
-    
+
                 if (sellerDoc) {
                     // Seller exists, maybe has empty or unrelated categories — add new one
                     sellerDoc.categories = sellerDoc.categories || [];
@@ -309,30 +309,49 @@ export class ExternalController {
                     });
                 }
             }
-    
+
             return res.status(200).json({
                 success: true,
                 message: "Calendar updated successfully",
                 data: updatedCalendar,
             });
-    
+
         } catch (error) {
             console.error("Error updating calendar: ", error);
             return res.status(500).json({ success: false, message: "Internal Server Error" });
         }
     };
-    
+
 
 
     private getSellerCalender = async (req: Request, res: Response): Promise<any> => {
         try {
             const { userId, catId, subCatId } = req.body;
-           // const calendar = await CalenderModel.find({});
+            // const calendar = await CalenderModel.find({});
 
-           const calendar = await CalenderModel.findOne({
-            sellerID: userId,
-            'categories.categoryID': catId
-            });
+            const calendar = await CalenderModel.aggregate([
+                {
+                    $match: {
+                        sellerID: userId
+                    }
+                },
+                {
+                    $project: {
+                        sellerID: 1,
+                        name: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                        categories: {
+                            $filter: {
+                                input: "$categories",
+                                as: "category",
+                                cond: { $eq: ["$$category.categoryID", catId] }
+                            }
+                        }
+                    }
+                }
+            ]);
+
 
             if (!calendar) {
                 return res.status(404).json({ success: false, message: "Calendar not found" });
@@ -364,7 +383,7 @@ export class ExternalController {
 
     public addAddress = async (req: Request, res: Response): Promise<any> => {
         try {
-            const { userId, address, city, state, postalCode, country , mobileNo , location , name  } = req.body;
+            const { userId, address, city, state, postalCode, country, mobileNo, location, name } = req.body;
 
             // Validate required fields
             if (!userId || !address || !city || !state || !postalCode || !country || !mobileNo || !location || !name) {
