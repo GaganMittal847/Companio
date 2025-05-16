@@ -33,7 +33,7 @@ export class ExternalController {
         this.router.get('/getSellerCalender', this.getSellerCalender);
         this.router.get('/getBanners', this.getBanners);
         this.router.post('/add/Address', this.addAddress);
-        this.router.get('/get/Address', this.getAddress);
+        this.router.post('/get/Address', this.getAddress);
 
 
     }
