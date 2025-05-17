@@ -30,10 +30,10 @@ export class ExternalController {
         this.router.post('/profileSetup', this.profileSetup);
         //  this.router.post('/catRegistration', this.categoryRegistration);
         this.router.post('/updateCalender', this.handleSellerCalender);
-        this.router.get('/getSellerCalender', this.getSellerCalender);
+        this.router.post('/getSellerCalender', this.getSellerCalender);
         this.router.get('/getBanners', this.getBanners);
         this.router.post('/add/Address', this.addAddress);
-        this.router.post('/get/Address', this.getAddress);
+        this.router.get('/get/Address', this.getAddress);
 
 
     }
