@@ -1,5 +1,5 @@
 import express from 'express';
-import { getMessagesByRequestId, deleteMessageById, updateMessageById, createMessage } from '../controllers/ChatController';
+import { getMessagesByRequestId, deleteMessageById, updateMessageById, createMessage, createChatList, getChatListsByUserId } from '../controllers/ChatController';
 
 const router = express.Router();
 
@@ -14,5 +14,11 @@ router.put('/messages/:id', updateMessageById);
 
 // Route to create a new message
 router.post('/messages', createMessage);
+
+// Route to create a new chat list
+router.post('/chatlists', createChatList);
+
+// Route to get chat lists by userId
+router.get('/chatlists/user/:userId', getChatListsByUserId);
 
 export { router as chatRoutes };

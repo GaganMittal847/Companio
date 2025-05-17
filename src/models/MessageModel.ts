@@ -3,7 +3,7 @@ import { MessageEntity } from '../entities/MessageEntity';
 
 // Define the Mongoose schema for the Message entity
 const MessageSchema: Schema = new Schema({
-    requestId: { type: Number, required: true }, // Primary key for grouping messages
+    requestId: { type: String, required: true }, // Foreign key linking to ChatList
     cDt: { type: Date, default: Date.now }, // Creation date, defaults to current timestamp
     msg: { type: String, required: true }, // Message content
     userId: { type: String, required: true }, // ID of the user who sent the message

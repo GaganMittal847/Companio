@@ -5,7 +5,8 @@ export enum HttpStatus {
     INTERNAL_SERVER_ERROR = 500,
     CREATED = 201,
     UNAUTHORIZED = 401,
-    FORBIDDEN = 403
+    FORBIDDEN = 403,
+    CONFLICT = 409
 }
 export class ApiResponse{
     static SUCCESS : string = 'success';
