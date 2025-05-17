@@ -50,7 +50,7 @@ export interface RequestEntity extends Document {
   finalPrice: number;
   createdAt?: Date;
   updatedAt?: Date;
-  addressId?: number;
+  addressId?: string;
   address?: string;
   requestStatus: RequestStatus;
   paymentStatus: PaymentStatus;

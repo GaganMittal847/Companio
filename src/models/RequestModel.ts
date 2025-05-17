@@ -31,7 +31,7 @@ const RequestSchema: Schema = new Schema(
       required: true
     },
     finalPrice: { type: Number, required: true },
-    addressId: { type: Number, required: true},
+    addressId: { type: String, required: true},
     address: { type: String, required: true },
     requestStatus: {type: String, enum: Object.values(RequestStatus)},
     paymentStatus: { type: String, enum: Object.values(PaymentStatus),}
