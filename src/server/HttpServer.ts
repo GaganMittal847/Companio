@@ -4,6 +4,7 @@ import cors from 'cors';
 import connectToDatabase from "../config/db";
 import { ExternalController } from "../controllers/ExternalController";
 import { categoryRoutes } from "../routes/categoryRoutes";
+import { chatRoutes } from "../routes/chatRoutes"; // Import chat routes
 export class HttpServer {
   private app: Express;
   private port: number;
@@ -48,6 +49,7 @@ export class HttpServer {
     const externalController = new ExternalController();
     this.app.use("/companio/external", externalController.router);
     this.app.use("/api/categories", categoryRoutes);
+    this.app.use("/api/chat", chatRoutes); // Use chat routes
     this.app.get("/cms/health", (req: Request, res: Response) => {
       res.status(200).json({
         status: "UP",
