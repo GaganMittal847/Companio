@@ -38,6 +38,7 @@ export interface RequestEntity extends Document {
   catId: string;
   subCatId: string;
   userId: string;
+  userName: string;
   companionId: string;
   comments?: string; // Optional
   price: number;

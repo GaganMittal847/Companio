@@ -16,6 +16,7 @@ const RequestSchema: Schema = new Schema(
     catId: { type: String, required: true },
     subCatId: { type: String, required: true },
     userId: { type: String, required: true },
+    userName: { type: String, required: true},
     companionId: { type: String, required: true },
     comments: { type: String, required: false }, // Optional field
     price: { type: Number, required: true },
