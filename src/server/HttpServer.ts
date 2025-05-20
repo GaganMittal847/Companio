@@ -7,6 +7,8 @@ import { CategoryController } from "../controllers/categoryController";
 import { SubCategoryController } from "../controllers/subCategoryController";
 import { SellerController } from "../controllers/sellerController";
 import { RequestController } from "../controllers/requestController";
+import { ChatController } from "../controllers/ChatController";
+
 
 export class HttpServer {
   private app: Express;
@@ -55,7 +57,7 @@ export class HttpServer {
     this.app.use("/api/subCategories", new SubCategoryController().router);
     this.app.use("/booking", new RequestController().router);
     this.app.use("/api/seller", new SellerController().router);
-    this.app.use("/api/chat", chatRoutes);
+    this.app.use("/api/chat", new ChatController().router);
     this.app.get("/cms/health", (req: Request, res: Response) => {
       res.status(200).json({
         status: "UP",
