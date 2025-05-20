@@ -18,7 +18,7 @@ export class SellerController {
     private configureRoutes(): void {
         this.router.post('/getListOfSellers', this.getListOfSellers);
         this.router.get('/getUserDataByID/:userId', this.getUserDataByID);
-        this.router.get('/getUsersRequests', this.getUsersRequests);
+        this.router.post('/getUsersRequests', this.getUsersRequests);
         this.router.post('/rejectRequest', this.rejectRequest);
     }
 
@@ -211,34 +211,66 @@ export class SellerController {
 
     private getUsersRequests = async (req: Request, res: Response): Promise<any> => {
         try {
-
-            const companionId = req.query.compId;
-
-            if (!companionId) {
-                return res.status(HttpStatus.BAD_REQUEST).json(
-                    new ApiResponseDto("fail", "companionId (compId) is required", null, HttpStatus.BAD_REQUEST)
-                );
-            }
-
-            const requests = await RequestModel.find({ companionId, requestStatus: "created" });
-
-            if (!requests.length) {
-                return res.status(HttpStatus.NOT_FOUND).json(
-                    new ApiResponseDto("failure", "No requests found", undefined, HttpStatus.NOT_FOUND)
-                );
-            }
-
-            return res.status(HttpStatus.OK).json(
-                new ApiResponseDto("success", "User requests fetched successfully", requests, HttpStatus.OK)
+          const { companionId, userId, requestStatus, dateFilter } = req.body;
+      
+          // Must provide at least one of the two
+          if (!companionId && !userId) {
+            return res.status(HttpStatus.BAD_REQUEST).json(
+              new ApiResponseDto("fail", "Either companionId or userId is required", null, HttpStatus.BAD_REQUEST)
             );
+          }
+      
+          // Build query only with present fields
+          const query: any = {};
+      
+          if (companionId) {
+            query.companionId = companionId;
+          }
+      
+          if (userId) {
+            query.userId = userId;
+          }
+      
+          if (requestStatus) {
+            query.requestStatus = requestStatus;
+          }
+      
+          // Apply date filter on `updatedAt`
+          if (dateFilter) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+      
+            if (dateFilter === 'today') {
+              query.updatedAt = { $gte: today, $lt: tomorrow };
+            } else if (dateFilter === 'upcoming') {
+              query.updatedAt = { $gte: tomorrow };
+            } else if (dateFilter === 'overdue') {
+              query.updatedAt = { $lt: today };
+            }
+          }
+      
+          const requests = await RequestModel.find(query);
+      
+          if (!requests.length) {
+            return res.status(HttpStatus.NOT_FOUND).json(
+              new ApiResponseDto("failure", "No requests found", undefined, HttpStatus.NOT_FOUND)
+            );
+          }
+      
+          return res.status(HttpStatus.OK).json(
+            new ApiResponseDto("success", "User requests fetched successfully", requests, HttpStatus.OK)
+          );
         } catch (error) {
-            console.error("❌ Error in getUsersRequests:", error);
-            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
-                new ApiResponseDto("failure", "Failed to retrieve user requests", undefined, HttpStatus.INTERNAL_SERVER_ERROR)
-            );
+          console.error("❌ Error in getUsersRequests:", error);
+          return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(
+            new ApiResponseDto("failure", "Failed to retrieve user requests", undefined, HttpStatus.INTERNAL_SERVER_ERROR)
+          );
         }
-    };
-
+      };
+      
+      
     private rejectRequest = async (req: Request, res: Response): Promise<any> => {
         try {
             console.log("🔹 Incoming request to reject:", JSON.stringify(req.query, null, 2));
