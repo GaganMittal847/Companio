@@ -20,12 +20,12 @@ export class ChatController {
     }
 
     private configureRoutes(): void {
-        this.router.get('/getMessagesByRequestId', this.getMessagesByRequestId);
-        this.router.post('/deleteMessageById', this.deleteMessageById);
-        this.router.post('/updateMessageById', this.updateMessageById);
+        this.router.get('/getMessagesByRequestId/:requestId', this.getMessagesByRequestId);
+        this.router.post('/deleteMessageById/:id', this.deleteMessageById);
+        this.router.post('/updateMessageById/:id', this.updateMessageById);
         this.router.post('/createMessage', this.createMessage);
         this.router.post('/createChatList', this.createChatList);
-        this.router.post('/getChatListsByUserId', this.getChatListsByUserId);
+        this.router.post('/getChatListsByUserId/:userId', this.getChatListsByUserId);
 
     }
 
