@@ -172,13 +172,35 @@ export class SellerController {
     }
 
     private getFilterConditions(filter: any) {
-        return {
-            ...(filter.catList && { catList: { $in: filter.catList } }),
-            ...(filter.subCatList && { subCatList: { $in: filter.subCatList } }),
-            ...(filter.gender && { gender: filter.gender }),
-            ...(filter.minRating && { rating: { $gte: filter.minRating } }),
-        };
+        const conditions: any = {};
+    
+        if (filter?.catList?.length) {
+            conditions['catList'] = {
+                $elemMatch: {
+                    catId: { $in: filter.catList }
+                }
+            };
+        }
+    
+        if (filter?.subCatList?.length) {
+            conditions['subCatList'] = {
+                $elemMatch: {
+                    subCatId: { $in: filter.subCatList }
+                }
+            };
+        }
+    
+        if (filter?.gender) {
+            conditions.gender = filter.gender;
+        }
+    
+        if (filter?.minRating) {
+            conditions.rating = { $gte: filter.minRating };
+        }
+    
+        return conditions;
     }
+    
 
     private getCalendarFilter(filter: any) {
         const conditions: any = {};
