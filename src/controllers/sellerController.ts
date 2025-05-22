@@ -233,7 +233,7 @@ export class SellerController {
 
     private getUsersRequests = async (req: Request, res: Response): Promise<any> => {
         try {
-          const { companionId, userId, requestStatus, dateFilter } = req.body;
+          const { companionId, userId, requestStatus, dateFilter , requestStatusId } = req.body;
       
           // Must provide at least one of the two
           if (!companionId && !userId) {
@@ -253,8 +253,8 @@ export class SellerController {
             query.userId = userId;
           }
       
-          if (requestStatus) {
-            query.requestStatus = requestStatus;
+          if (requestStatusId) {
+            query.requestStatusId = requestStatusId;
           }
       
           // Apply date filter on `updatedAt`

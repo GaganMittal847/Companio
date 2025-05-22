@@ -329,28 +329,58 @@ export class ExternalController {
             const { userId, catId, subCatId } = req.body;
             // const calendar = await CalenderModel.find({});
 
+            const today = new Date(); // Current date
+
             const calendar = await CalenderModel.aggregate([
-                {
-                    $match: {
-                        sellerID: userId
-                    }
-                },
-                {
-                    $project: {
-                        sellerID: 1,
-                        name: 1,
-                        createdAt: 1,
-                        updatedAt: 1,
-                        categories: {
-                            $filter: {
-                                input: "$categories",
-                                as: "category",
-                                cond: { $eq: ["$$category.categoryID", catId] }
-                            }
-                        }
-                    }
+              {
+                $match: {
+                  sellerID: userId
                 }
+              },
+              {
+                $project: {
+                  sellerID: 1,
+                  name: 1,
+                  createdAt: 1,
+                  updatedAt: 1,
+                  categories: {
+                    $map: {
+                      input: {
+                        $filter: {
+                          input: "$categories",
+                          as: "category",
+                          cond: { $eq: ["$$category.categoryID", catId] }
+                        }
+                      },
+                      as: "category",
+                      in: {
+                        categoryID: "$$category.categoryID",
+                        weekdaysPrice: "$$category.weekdaysPrice",
+                        weekendsPrice: "$$category.weekendsPrice",
+                        availability: {
+                          $cond: {
+                            if: { $isArray: "$$category.availability.days" },
+                            then: {
+                              days: {
+                                $filter: {
+                                  input: "$$category.availability.days",
+                                  as: "day",
+                                  cond: {
+                                    $gt: [{ $toDate: "$$day.date" }, today]
+                                  }
+                                }
+                              }
+                            },
+                            else: "$$category.availability"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             ]);
+            
 
 
             if (!calendar) {

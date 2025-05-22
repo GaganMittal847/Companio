@@ -34,6 +34,7 @@ const RequestSchema: Schema = new Schema(
     addressId: { type: String, required: true},
     address: { type: String, required: true },
     requestStatus: {type: String, enum: Object.values(RequestStatus)},
+    requestStatusId: {type : Number , required: true},
     paymentStatus: { type: String, enum: Object.values(PaymentStatus),}
   },
   { timestamps: true } // Adds createdAt and updatedAt fields automatically

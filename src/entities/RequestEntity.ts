@@ -17,7 +17,7 @@ export enum RequestStatus {
   
   // Buyer Final Action
   TOP_SELLERS_SELECTED = 'Top Sellers Selected',  // Top 5 sellers selected by the system
-  BUYER_SELECTED_SELLER = 'Buyer Selected Seller',  // Buyer selects one seller from the top sellers
+  BUYER_SELECTED_SELLER = 'New',  // Buyer selects one seller from the top sellers
   COMPLETED = 'Completed',  // Booking request is completed
   CANCELLED = 'Cancelled',  // Booking request is cancelled by buyer or seller
 }
@@ -53,5 +53,6 @@ export interface RequestEntity extends Document {
   addressId?: string;
   address?: string;
   requestStatus: RequestStatus;
+  requestStatusId: number;
   paymentStatus: PaymentStatus;
 }
