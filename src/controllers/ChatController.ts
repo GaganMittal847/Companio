@@ -20,7 +20,7 @@ export class ChatController {
     }
 
     private configureRoutes(): void {
-        this.router.get('/getMessagesByRequestId/:requestId', this.getMessagesByRequestId);
+        this.router.get('/getMessagesByRequestId', this.getMessagesByRequestId); // Changed route
         this.router.post('/deleteMessageById/:id', this.deleteMessageById);
         this.router.post('/updateMessageById/:id', this.updateMessageById);
         this.router.post('/createMessage', this.createMessage);
@@ -32,14 +32,44 @@ export class ChatController {
     private getMessagesByRequestId = async (req: Request, res: Response): Promise<any> => {
         const apiResponseDto = new ApiResponseDto();
         try {
-            const requestId = req.params.requestId;
+            const { requestId, pageSize: pageSizeQuery, pageNumber: pageNumberQuery } = req.query;
 
-            // No need to validate if it's a number anymore, as it's a string
+            if (!requestId) {
+                apiResponseDto.status = ApiResponse.ERROR;
+                apiResponseDto.message = "requestId is required";
+                apiResponseDto.responseCode = HttpStatus.BAD_REQUEST;
+                return res.status(HttpStatus.BAD_REQUEST).json(apiResponseDto);
+            }
 
-            const messages = await MessageModel.find({ requestId: requestId }).sort({ cDt: 1 });
+            let pageNumber = parseInt(pageNumberQuery as string, 10);
+            let pageSize = parseInt(pageSizeQuery as string, 10);
+
+            // Validate and set defaults for pageNumber and pageSize
+            if (isNaN(pageNumber) || pageNumber < 1) {
+                pageNumber = 1; // Default to page 1 if invalid or not provided
+            }
+            if (isNaN(pageSize) || pageSize < 1) {
+                pageSize = 20; // Default to 20 items per page if invalid or not provided
+            }
+
+            const skip = (pageNumber - 1) * pageSize; // pageNumber is 1-indexed
+
+            const messages = await MessageModel.find({ requestId: requestId })
+                .sort({ cDt: -1 }) // Sort by most recent first
+                .skip(skip)
+                .limit(pageSize);
+            
+            const totalMessages = await MessageModel.countDocuments({ requestId: requestId });
+            const totalPages = Math.ceil(totalMessages / pageSize);
 
             apiResponseDto.status = ApiResponse.SUCCESS;
-            apiResponseDto.data = messages;
+            apiResponseDto.data = {
+                messages,
+                currentPage: pageNumber,
+                itemsPerPage: pageSize,
+                totalMessages,
+                totalPages
+            };
             apiResponseDto.responseCode = HttpStatus.OK;
             return res.status(HttpStatus.OK).json(apiResponseDto);
         } catch (error) {
